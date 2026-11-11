@@ -137,7 +137,21 @@ impl TailedLinkedList {
     }
 
     fn insert(&mut self, value: u32, index: usize) {
+        if self.head.is_null() { return; }
 
+        let mut current = self.head;
+
+        unsafe {
+            for _ in 0..index-1 {
+                if (*current).next.is_null() {
+                    return;
+                }
+                current = (*current).next;
+            }
+
+            let new_node = Node::new(value, (*current).next);
+            (*current).next = new_node; 
+        }   
     }
 }
 
