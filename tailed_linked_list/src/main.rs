@@ -77,7 +77,19 @@ impl TailedLinkedList {
     }
 
     fn size(&mut self) -> u32 {
+        if self.head.is_null() { return 0; }
 
+        let mut size = 1;
+        let mut current = self.head;
+
+        unsafe {
+            while (*current).next != self.tail {
+                size += 1;
+                current = (*current).next;
+            }
+        }
+
+        return size;
     }
 
     fn is_empty(&mut self) -> bool {
