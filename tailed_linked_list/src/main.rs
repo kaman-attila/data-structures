@@ -99,7 +99,21 @@ impl TailedLinkedList {
     }
 
     fn contains(&mut self, value: u32) -> bool {
+        if self.head.is_null() { return false; }
 
+        let mut current = self.head;
+
+        unsafe {
+            while !(*current).next.is_null() {
+                if (*current).value == value {
+                    return true;
+                }
+
+                current = (*current).next;
+            }
+        }
+
+        return false
     }
 
     fn at(&mut self, index: usize) -> Option<u32> {
