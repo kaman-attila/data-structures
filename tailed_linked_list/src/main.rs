@@ -81,7 +81,9 @@ impl TailedLinkedList {
     }
 
     fn is_empty(&mut self) -> bool {
+        if self.head.is_null() { return true; }
 
+        false
     }
 
     fn contains(&mut self, value: u32) -> bool {
