@@ -11,7 +11,18 @@ fn initialize_buffer(size: usize) -> GapBuffer {
 }
 
 fn debug(gb: &GapBuffer) {
-    print!("");
+    for i in 0..gb.capacity {
+        if i < gb.left {
+            print!("{}", at(gb, i));
+        }
+        else if i >= gb.right {
+            print!("{}", at(gb, i));
+        }
+        else {
+            print!("_");
+        }
+    }
+    print!("\n");
 }
 
 fn type_char(gb: &mut GapBuffer, c: char) {
