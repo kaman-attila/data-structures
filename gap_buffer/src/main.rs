@@ -6,29 +6,34 @@ struct GapBuffer {
 }
 
 fn initialize_buffer(size: usize) -> GapBuffer {
+    let layout = std::alloc::Layout::array::<char>(size).unwrap();
+    unsafe {GapBuffer{capacity: size, data: std::alloc::alloc(layout) as *mut char, left: 0, right: size}}
 }
 
 fn debug(gb: &GapBuffer) {
+    todo!();
 }
 
 fn type_char(gb: &mut GapBuffer, c: char) {
-
+    todo!();
 }
 
 fn insert_text(gb: &mut GapBuffer, text: &str) {
-    
+    for c in text.chars() {
+        type_char(gb, c);
+    }
 }
 
 fn move_left(gb: &mut GapBuffer) {
-    
+    todo!();
 }
 
 fn move_right(gb: &mut GapBuffer) {
-    
+    todo!();
 }
 
 fn backspace(gb: &mut GapBuffer) {
-    
+    todo!();
 }
 
 fn main() {
