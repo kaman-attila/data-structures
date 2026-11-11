@@ -102,8 +102,24 @@ impl TailedLinkedList {
 
     }
 
-    fn at(&mut self, index: usize) -> u32 {
+    fn at(&mut self, index: usize) -> Option<u32> {
+        if self.head.is_null() { return None; }
 
+        let mut current = self.head;
+
+        let value;
+        unsafe {
+            for _ in 0..index {
+                if (*current).next.is_null() {
+                    return None;
+                }
+                current = (*current).next;
+            }
+
+            value = (*current).value;
+        }
+
+        Some(value)
     }
 
     fn insert(&mut self, value: u32, index: usize) {
