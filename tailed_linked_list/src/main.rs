@@ -20,8 +20,23 @@ impl TailedLinkedList {
         }
     }
 
-    fn pop_front(&mut self) -> u32 {
+    fn pop_front(&mut self) -> Option<u32> {
+        if self.head.is_null() { return None; }
 
+        let temp = self.head;
+        let value;
+        unsafe{
+            value = (*temp).value;
+            self.head = (*temp).next;
+            let layout = std::alloc::Layout::new::<Node>();
+            std::alloc::dealloc(temp as *mut u8, layout);
+        }
+
+        if self.head.is_null() {
+            self.tail = std::ptr::null_mut();
+        }
+
+        Some(value)
     }
 
     fn push_back(&mut self, value: u32) {
@@ -35,8 +50,30 @@ impl TailedLinkedList {
         self.tail = new_node;
     }
 
-    fn pop_back(&mut self) -> u32 {
+    fn pop_back(&mut self) -> Option<u32> {
+        if self.head.is_null() { return None; }
 
+        let temp = self.tail;
+        let value;
+
+        unsafe {
+            value = (*temp).value;
+            if (*self.head).next.is_null() {
+                self.head = std::ptr::null_mut();
+                self.tail = std::ptr::null_mut();
+            } else {
+                let mut current = self.head;
+                while (*current).next != temp {
+                    current = (*current).next;
+                }
+                (*current).next = std::ptr::null_mut();
+                self.tail = current;
+            }
+            let layout = std::alloc::Layout::new::<Node>();
+            std::alloc::dealloc(temp as *mut u8, layout);
+        }
+
+        Some(value)
     }
 
     fn size(&mut self) -> u32 {
