@@ -186,6 +186,20 @@ impl Node {
     }
 }
 
+impl Drop for TailedLinkedList {
+    fn drop(&mut self) {
+        let layout = std::alloc::Layout::new::<Node>();
+
+        while !self.head.is_null() {
+            let temp = self.head;
+            unsafe {
+                self.head = (*self.head).next;
+                std::alloc::dealloc(temp as *mut u8, layout)
+            }
+        }
+    }
+}
+
 impl std::fmt::Display for TailedLinkedList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut current = self.head;
