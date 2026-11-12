@@ -22,7 +22,9 @@ struct Mesh {
 
 impl Mesh {
     fn new(triangle_count: usize) -> Self {
-        Mesh { triangles: Vec::with_capacity(triangle_count) }
+        Mesh {
+            triangles: Vec::with_capacity(triangle_count),
+        }
     }
 
     fn push(&mut self, triangle: Triangle) {
@@ -31,10 +33,7 @@ impl Mesh {
 }
 
 fn distance_pp(p1: Point, p2: Point) -> f32 {
-    ((p1.x - p2.x).powi(2)
-        + (p1.y - p2.y).powi(2)
-        + (p1.z - p2.z).powi(2))
-        .sqrt()
+    ((p1.x - p2.x).powi(2) + (p1.y - p2.y).powi(2) + (p1.z - p2.z).powi(2)).sqrt()
 }
 
 fn distance_pt(p: Point, t: Triangle) -> f32 {
@@ -53,8 +52,8 @@ fn load_mesh(filename: &str) -> Mesh {
         .expect("mesh file is missing its triangle count")
         .parse::<usize>()
         .unwrap_or_else(|error| panic!("invalid triangle count in '{filename}': {error}"));
-    
-    let mut mesh= Mesh::new(triangle_count); 
+
+    let mut mesh = Mesh::new(triangle_count);
     //TODO
 
     for _ in 0..triangle_count {
@@ -75,7 +74,7 @@ fn load_mesh(filename: &str) -> Mesh {
                 .next()
                 .expect("mesh file is missing a vertex coordinate")
                 .parse::<f32>()
-                .expect("mesh vertex coordinate is not a valid number");  
+                .expect("mesh vertex coordinate is not a valid number");
 
             let point = Point::new(x, y, z);
             triangle[p] = point;
@@ -97,8 +96,14 @@ fn save_to_file(mesh: &Mesh, filename: &str) {
         .unwrap_or_else(|error| panic!("failed to create mesh file '{filename}': {error}"));
     let mut writer = BufWriter::new(file);
     let _ = mesh;
-    writeln!(writer, "{}", 1).expect("failed to write triangle count");
-    writeln!(writer, "{} {} {}", 1.0, 2.0, 3.0).expect("failed to write vertex coordinates");
+    writeln!(writer, "{}", mesh.triangles.len()).expect("failed to write triangle count");
+    for triangle in mesh.triangles.iter() {
+        for point in triangle {
+            write!(writer, "{} {} {}", point.x, point.y, point.z)
+                .expect("failed to write vertex coordinates");
+        }
+        write!(writer, "\n").expect("failed to write new line");
+    }
 }
 
 fn closest_triangles(mesh: &Mesh, p: Point, count: usize) -> Mesh {
