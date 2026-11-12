@@ -54,7 +54,6 @@ fn load_mesh(filename: &str) -> Mesh {
         .unwrap_or_else(|error| panic!("invalid triangle count in '{filename}': {error}"));
 
     let mut mesh = Mesh::new(triangle_count);
-    //TODO
 
     for _ in 0..triangle_count {
         let dummy_point = Point::new(0.0, 0.0, 0.0);
@@ -78,11 +77,9 @@ fn load_mesh(filename: &str) -> Mesh {
 
             let point = Point::new(x, y, z);
             triangle[p] = point;
-            //TODO
         }
         mesh.push(triangle);
     }
-    //TODO
     mesh
 }
 
@@ -99,7 +96,7 @@ fn save_to_file(mesh: &Mesh, filename: &str) {
     writeln!(writer, "{}", mesh.triangles.len()).expect("failed to write triangle count");
     for triangle in mesh.triangles.iter() {
         for point in triangle {
-            write!(writer, "{} {} {}", point.x, point.y, point.z)
+            write!(writer, "{} {} {} ", point.x, point.y, point.z)
                 .expect("failed to write vertex coordinates");
         }
         write!(writer, "\n").expect("failed to write new line");
@@ -107,9 +104,21 @@ fn save_to_file(mesh: &Mesh, filename: &str) {
 }
 
 fn closest_triangles(mesh: &Mesh, p: Point, count: usize) -> Mesh {
-    // TODO
-    let _ = (mesh, p, count);
-    todo!()
+    let mut closest_mesh = Mesh::new(count);
+    let mut distances: Vec<(f32, Triangle)> = vec![];
+
+    for triangle in mesh.triangles.iter() {
+        distances.push((distance_pt(p, *triangle), *triangle));
+    }
+
+    distances.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+
+    let limit = count.min(distances.len());
+    for i in 0..limit {
+        closest_mesh.push(distances[i].1);
+    }
+
+    closest_mesh
 }
 
 fn main() {
@@ -134,7 +143,7 @@ fn main() {
         for count in counts {
             println!("Player {}, Count {}", player_index + 1, count);
             let mut closest = closest_triangles(&mesh, *player, count);
-            let filename = format!("player_{}_count_{}.mesh", player_index + 1, count);
+            let filename = format!("mesh/player_{}_count_{}.mesh", player_index + 1, count);
             save_to_file(&closest, &filename);
             free_mesh(&mut closest);
         }
