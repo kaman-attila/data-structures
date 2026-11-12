@@ -84,7 +84,7 @@ impl TailedLinkedList {
         Some(value)
     }
 
-    fn size(&mut self) -> u32 {
+    fn size(&self) -> u32 {
         if self.head.is_null() {
             return 0;
         }
@@ -93,7 +93,7 @@ impl TailedLinkedList {
         let mut current = self.head;
 
         unsafe {
-            while (*current).next != self.tail {
+            while current != self.tail {
                 size += 1;
                 current = (*current).next;
             }
@@ -102,7 +102,7 @@ impl TailedLinkedList {
         return size;
     }
 
-    fn is_empty(&mut self) -> bool {
+    fn is_empty(&self) -> bool {
         if self.head.is_null() {
             return true;
         }
@@ -110,15 +110,11 @@ impl TailedLinkedList {
         false
     }
 
-    fn contains(&mut self, value: u32) -> bool {
-        if self.head.is_null() {
-            return false;
-        }
-
+    fn contains(&self, value: u32) -> bool {
         let mut current = self.head;
 
         unsafe {
-            while !(*current).next.is_null() {
+            while !current.is_null() {
                 if (*current).value == value {
                     return true;
                 }
@@ -127,23 +123,23 @@ impl TailedLinkedList {
             }
         }
 
-        return false;
+        false
     }
 
-    fn at(&mut self, index: usize) -> Option<u32> {
-        if self.head.is_null() {
-            return None;
-        }
-
+    fn at(&self, index: usize) -> Option<u32> {
         let mut current = self.head;
 
         let value;
         unsafe {
             for _ in 0..index {
-                if (*current).next.is_null() {
+                if current.is_null() {
                     return None;
                 }
                 current = (*current).next;
+            }
+
+            if current.is_null() {
+                return None;
             }
 
             value = (*current).value;
@@ -153,15 +149,16 @@ impl TailedLinkedList {
     }
 
     fn insert(&mut self, value: u32, index: usize) {
-        if self.head.is_null() {
+        if index == 0 {
+            self.push_front(value);
             return;
         }
 
         let mut current = self.head;
 
         unsafe {
-            for _ in 0..index - 1 {
-                if (*current).next.is_null() {
+            for _ in 0..(index - 1) {
+                if current.is_null() {
                     return;
                 }
                 current = (*current).next;
@@ -169,6 +166,10 @@ impl TailedLinkedList {
 
             let new_node = Node::new(value, (*current).next);
             (*current).next = new_node;
+
+            if (*new_node).next.is_null() {
+                self.tail = new_node;
+            }
         }
     }
 }
@@ -235,10 +236,11 @@ fn main() {
     tll.push_back(10);
     println!("{}", tll);
 
-    if tll.contains(10) {
-        println!("It contains this value!");
+    let value = 10;
+    if tll.contains(value) {
+        println!("It contains {}!", value);
     } else {
-        println!("It does not contain this value!");
+        println!("It does not contain {}!", value);
     }
 
     println!("The size of this talied linked list: {}", tll.size());
