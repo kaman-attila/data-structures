@@ -8,6 +8,12 @@ struct Point {
     z: f32,
 }
 
+impl Point {
+    fn new(x: f32, y: f32, z: f32) -> Self {
+        Point { x, y, z }
+    }
+}
+
 type Triangle = [Point; 3];
 
 struct Mesh {
@@ -15,8 +21,12 @@ struct Mesh {
 }
 
 impl Mesh {
-    fn new() -> Self {
-        Mesh { triangles: vec![] }
+    fn new(triangle_count: usize) -> Self {
+        Mesh { triangles: Vec::with_capacity(triangle_count) }
+    }
+
+    fn push(&mut self, triangle: Triangle) {
+        self.triangles.push(triangle);
     }
 }
 
@@ -44,9 +54,12 @@ fn load_mesh(filename: &str) -> Mesh {
         .parse::<usize>()
         .unwrap_or_else(|error| panic!("invalid triangle count in '{filename}': {error}"));
     
-    let mut mesh= Mesh::new(); 
+    let mut mesh= Mesh::new(triangle_count); 
+    //TODO
 
-    for t in 0..triangle_count {
+    for _ in 0..triangle_count {
+        let dummy_point = Point::new(0.0, 0.0, 0.0);
+        let mut triangle: Triangle = [dummy_point, dummy_point, dummy_point];
         for p in 0..3 {
             let x = values
                 .next()
@@ -63,11 +76,14 @@ fn load_mesh(filename: &str) -> Mesh {
                 .expect("mesh file is missing a vertex coordinate")
                 .parse::<f32>()
                 .expect("mesh vertex coordinate is not a valid number");  
-            // TODO    
-        }
-    }
-    
 
+            let point = Point::new(x, y, z);
+            triangle[p] = point;
+            //TODO
+        }
+        mesh.push(triangle);
+    }
+    //TODO
     mesh
 }
 
