@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{BufWriter, Write};
 
-
+#[derive(Clone, Copy)]
 struct Point {
     x: f32,
     y: f32,
@@ -10,9 +10,14 @@ struct Point {
 
 type Triangle = [Point; 3];
 
-
 struct Mesh {
-    // TODO
+    triangles: Vec<Triangle>,
+}
+
+impl Mesh {
+    fn new() -> Self {
+        Mesh { triangles: vec![] }
+    }
 }
 
 fn distance_pp(p1: Point, p2: Point) -> f32 {
@@ -39,7 +44,7 @@ fn load_mesh(filename: &str) -> Mesh {
         .parse::<usize>()
         .unwrap_or_else(|error| panic!("invalid triangle count in '{filename}': {error}"));
     
-    // TODO 
+    let mut mesh= Mesh::new(); 
 
     for t in 0..triangle_count {
         for p in 0..3 {
@@ -61,7 +66,9 @@ fn load_mesh(filename: &str) -> Mesh {
             // TODO    
         }
     }
-    // TODO
+    
+
+    mesh
 }
 
 fn free_mesh(mesh: &mut Mesh) {
