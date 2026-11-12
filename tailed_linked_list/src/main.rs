@@ -169,4 +169,39 @@ impl Node {
 
 fn main() {
     let mut tll = TailedLinkedList::new();
+
+    tll.push_front(2);
+    tll.pop_front();
+    tll.push_back(5);
+    tll.push_front(2);
+    tll.pop_back();
+
+    if tll.is_empty() {
+        println!("Tailed linked list is empty.");
+    } else {
+        println!("Tailed linked list is not empty.");
+    }
+
+    tll.push_front(42);
+    tll.push_back(10);
+
+    if tll.contains(10) {
+        println!("It contains this value!");
+    } else {
+        println!("It does not contain this value!");
+    }
+
+    println!("The size of this talied linked list: {}", tll.size());
+
+    tll.insert(39, 1);
+
+    let index = 1;
+    let found = tll.at(index);
+    if let Some(x) = found {
+        println!("The value at position {} is {}.", index, x);
+    } else {
+
+        println!("Tailed linked list has no value at position {}", index)
+    }
+    
 }
