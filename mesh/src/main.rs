@@ -88,8 +88,8 @@ fn load_mesh(filename: &str) -> Mesh {
 }
 
 fn free_mesh(mesh: &mut Mesh) {
-    // TODO
     mesh.triangles.clear();
+    mesh.triangles.shrink_to_fit();
 }
 
 fn save_to_file(mesh: &Mesh, filename: &str) {
@@ -108,8 +108,8 @@ fn closest_triangles(mesh: &Mesh, p: Point, count: usize) -> Mesh {
 }
 
 fn main() {
-    let mesh = load_mesh("bunny.txt");
-    save_to_file(&mesh, "test_bunny_copy.txt");
+    let mesh = load_mesh("mesh/bunny.txt");
+    save_to_file(&mesh, "mesh/test_bunny_copy.txt");
 
     let players = [
         Point {
