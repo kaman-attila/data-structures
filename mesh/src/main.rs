@@ -92,7 +92,6 @@ fn save_to_file(mesh: &Mesh, filename: &str) {
     let file = File::create(filename)
         .unwrap_or_else(|error| panic!("failed to create mesh file '{filename}': {error}"));
     let mut writer = BufWriter::new(file);
-    let _ = mesh;
     writeln!(writer, "{}", mesh.triangles.len()).expect("failed to write triangle count");
     for triangle in mesh.triangles.iter() {
         for point in triangle {
@@ -104,21 +103,64 @@ fn save_to_file(mesh: &Mesh, filename: &str) {
 }
 
 fn closest_triangles(mesh: &Mesh, p: Point, count: usize) -> Mesh {
-    let mut closest_mesh = Mesh::new(count);
     let mut distances: Vec<(f32, Triangle)> = vec![];
 
     for triangle in mesh.triangles.iter() {
         distances.push((distance_pt(p, *triangle), *triangle));
     }
 
-    distances.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
-
     let limit = count.min(distances.len());
+    let mut closest_mesh = Mesh::new(limit);
+
+    quick_select(&mut distances, limit);
+    quick_sort(&mut distances[..limit]);
     for i in 0..limit {
         closest_mesh.push(distances[i].1);
     }
 
     closest_mesh
+}
+
+fn quick_select(list: &mut [(f32, Triangle)], limit: usize) {
+    if list.len() < 2 {
+        return;
+    }
+
+    let p = partition(list);
+
+    if limit < p {
+        quick_select(&mut list[..p], limit);
+    } else if limit > p {
+        quick_select(&mut list[p + 1..], limit - (p + 1));
+    }
+}
+
+fn quick_sort(list: &mut [(f32, Triangle)]) {
+    if list.len() < 2 {
+        return;
+    }
+
+    let p = partition(list);
+    quick_sort(&mut list[..p]);
+    quick_sort(&mut list[p + 1..]);
+}
+
+fn partition(list: &mut [(f32, Triangle)]) -> usize {
+    let last = list.len() - 1;
+
+    list.swap(last / 2, last);
+    let pivot = list[last].0;
+
+    let mut temp = 0;
+    for i in 0..last {
+        if list[i].0 < pivot {
+            list.swap(temp, i);
+            temp += 1;
+        }
+    }
+    list.swap(temp, last);
+
+    temp
 }
 
 fn main() {
