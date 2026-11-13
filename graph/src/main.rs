@@ -89,6 +89,43 @@ impl Graph {
     fn new(adjacency_list: Vec<Vec<Vertex>>) -> Self {
         Graph { adjacency_list }
     }
+
+    fn breadth_first_search(&mut self, start: usize) -> u32 {
+        let mut visited = vec![false; self.adjacency_list.len()];
+        visited[start] = true;
+
+        let mut current_day_queue = vec![start];
+        let mut days = 0;
+
+        while !current_day_queue.is_empty() {
+            println!(
+                "Day {}: {} new triangles got rusty.",
+                days,
+                current_day_queue.len()
+            );
+
+            let mut next_day_queue: Vec<usize> = Vec::new();
+
+            for triangle in current_day_queue {
+                for neighbor in &self.adjacency_list[triangle] {
+                    let neighbor_index = neighbor.triangle_index;
+
+                    if !visited[neighbor_index] {
+                        visited[neighbor_index] = true;
+                        next_day_queue.push(neighbor_index);
+                    }
+                }
+            }
+
+            current_day_queue = next_day_queue;
+
+            if !current_day_queue.is_empty() {
+                days += 1;
+            }
+        }
+
+        days
+    }
 }
 
 fn load_mesh(filename: &str) -> Mesh {
@@ -158,11 +195,6 @@ fn build_adjacency(mesh: &Mesh) -> Vec<Vec<Vertex>> {
         for x in i..j {
             for y in i..j {
                 if x != y {
-                    println!(
-                        "{:?}, {:?}",
-                        sorted_vertices[x].triangle_index,
-                        adjacency_list.len()
-                    );
                     adjacency_list[sorted_vertices[x].triangle_index].push(sorted_vertices[y]);
                 }
             }
@@ -214,16 +246,12 @@ fn display_answer(days: u32) {
     );
 }
 
-fn display_day(graph: &Graph) {
-    for (i, list) in graph.adjacency_list.iter().enumerate() {
-        println!("Day {}: {} new triangles got rusty.", i, list.len());
-    }
-}
-
 fn main() {
     let chosen_triangle: usize = 8; // HARDCODED INPUT
 
     let mesh = load_mesh("mesh/bunny.txt");
 
-    let graph = Graph::new(build_adjacency(&mesh));
+    let mut graph = Graph::new(build_adjacency(&mesh));
+
+    display_answer(graph.breadth_first_search(chosen_triangle));
 }
