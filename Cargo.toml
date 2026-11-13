@@ -1,5 +1,5 @@
 [workspace]
 resolver = "3"
 members = [
-    "gap_buffer", "mesh", "tailed_linked_list",
+    "gap_buffer", "graph", "mesh", "tailed_linked_list",
 ]
