@@ -156,13 +156,13 @@ fn build_adjacency(mesh: &Mesh) -> Vec<Vec<Vertex>> {
 }
 
 fn merge_sort(list: &[Vertex]) -> Vec<Vertex> {
-    if list.len() > 1 {
+    if list.len() < 2 {
         return list.to_vec();
     }
 
     let mid = list.len() / 2;
     let left = merge_sort(&list[..mid]);
-    let right = merge_sort(list);
+    let right = merge_sort(&list[mid..]);
 
     merge(&left, &right)
 }
