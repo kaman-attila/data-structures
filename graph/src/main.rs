@@ -1,17 +1,3 @@
-struct Graph {
-    adjacency_list: Vec<Vec<usize>>,
-}
-
-impl Graph {
-    fn new(triangle_count: usize) -> Self {
-        Graph {
-            adjacency_list: Vec::with_capacity(triangle_count),
-        }
-    }
-
-    fn push(value: f32) {}
-}
-
 #[derive(Clone, Copy)]
 struct Point {
     x: f32,
@@ -22,6 +8,22 @@ struct Point {
 impl Point {
     fn new(x: f32, y: f32, z: f32) -> Self {
         Point { x, y, z }
+    }
+
+    fn compare_with(self, point: Point) -> (Point, Point) {
+        if self.x > point.x {
+            return (self, point);
+        } else if self.x == point.x {
+            if self.y > point.y {
+                return (self, point);
+            } else if self.y == point.y {
+                if self.z > point.z {
+                    return (self, point);
+                }
+            }
+        }
+
+        (point, self)
     }
 }
 
@@ -45,6 +47,26 @@ impl Mesh {
     fn len(&self) -> usize {
         self.triangles.len()
     }
+}
+
+struct Vertex {
+    a: Point,
+    b: Point,
+    triangle_index: usize,
+}
+
+struct Graph {
+    adjacency_list: Vec<Vec<Vertex>>,
+}
+
+impl Graph {
+    fn new(vertex_count: usize) -> Self {
+        Graph {
+            adjacency_list: Vec::with_capacity(vertex_count),
+        }
+    }
+
+    fn push(value: f32) {}
 }
 
 fn load_mesh(filename: &str) -> Mesh {
@@ -87,8 +109,44 @@ fn load_mesh(filename: &str) -> Mesh {
     mesh
 }
 
-fn load_graph(mesh: &Mesh) {
-    let mut graph = Graph::new(mesh.len());
+fn compare_points(points: (Point, Point)) -> (Point, Point) {
+    if points.0.x > points.1.x {
+        return (points.0, points.1);
+    } else if points.0.x == points.1.x {
+        if points.0.y > points.1.y {
+            return (points.0, points.1);
+        } else if points.0.y == points.1.y {
+            if points.0.z > points.1.z {
+                return (points.0, points.1);
+            }
+        }
+    }
+
+    (points.1, points.0)
+}
+
+fn build_adjacency(mesh: &Mesh) -> Vec<Vec<Vertex>> {
+    let mut vertices: Vec<Vertex> = Vec::with_capacity(mesh.len() * 3);
+
+    for (i, triangle) in mesh.triangles.iter().enumerate() {
+        for j in 0..3 {
+            let mut points = if j < 2 {
+                triangle[j].compare_with(triangle[j + 1]);
+            } else {
+                triangle[j].compare_with(triangle[0]);
+            };
+
+            vertices.push(Vertex {
+                a: points.0,
+                b: points.1,
+                triangle_index: i,
+            });
+        }
+    }
+
+    let mut adjacency_list = Vec::with_capacity(mesh.len());
+
+    adjacency_list
 }
 
 fn display_answer(days: u32) {
