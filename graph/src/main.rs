@@ -130,10 +130,10 @@ fn build_adjacency(mesh: &Mesh) -> Vec<Vec<Vertex>> {
 
     for (i, triangle) in mesh.triangles.iter().enumerate() {
         for j in 0..3 {
-            let mut points = if j < 2 {
-                triangle[j].compare_with(triangle[j + 1]);
+            let points: (Point, Point) = if j < 2 {
+                triangle[j].compare_with(triangle[j + 1])
             } else {
-                triangle[j].compare_with(triangle[0]);
+                triangle[j].compare_with(triangle[0])
             };
 
             vertices.push(Vertex {
