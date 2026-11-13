@@ -1,3 +1,17 @@
+struct Graph {
+    adjacency_list: Vec<Vec<usize>>,
+}
+
+impl Graph {
+    fn new(triangle_count: usize) -> Self {
+        Graph {
+            adjacency_list: Vec::with_capacity(triangle_count),
+        }
+    }
+
+    fn push(value: f32) {}
+}
+
 #[derive(Clone, Copy)]
 struct Point {
     x: f32,
@@ -26,6 +40,10 @@ impl Mesh {
 
     fn push(&mut self, triangle: Triangle) {
         self.triangles.push(triangle);
+    }
+
+    fn len(&self) -> usize {
+        self.triangles.len()
     }
 }
 
@@ -69,15 +87,27 @@ fn load_mesh(filename: &str) -> Mesh {
     mesh
 }
 
-fn display(days: u32) {
+fn load_graph(mesh: &Mesh) {
+    let mut graph = Graph::new(mesh.len());
+}
+
+fn display_answer(days: u32) {
     println!(
         "It takes {} days for the bunny to become completely rusty!",
         days
     );
 }
 
+fn display_day(graph: &Graph) {
+    for (i, list) in graph.adjacency_list.iter().enumerate() {
+        println!("Day {}: {} new triangles got rusty.", i, list.len());
+    }
+}
+
 fn main() {
     let chosen_triangle: usize = 8; // HARDCODED INPUT
 
     let mesh = load_mesh("mesh/bunny.txt");
+
+    load_graph(&mesh);
 }
