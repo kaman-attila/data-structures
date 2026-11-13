@@ -10,20 +10,20 @@ impl Point {
         Point { x, y, z }
     }
 
-    fn compare_with(self, point: Point) -> (Point, Point) {
+    fn is_larger(self, point: Point) -> bool {
         if self.x > point.x {
-            return (self, point);
+            return true;
         } else if self.x == point.x {
             if self.y > point.y {
-                return (self, point);
+                return true;
             } else if self.y == point.y {
                 if self.z > point.z {
-                    return (self, point);
+                    return true;
                 }
             }
         }
 
-        (point, self)
+        false
     }
 }
 
@@ -49,10 +49,32 @@ impl Mesh {
     }
 }
 
+#[derive(Clone, Copy)]
 struct Vertex {
     a: Point,
     b: Point,
     triangle_index: usize,
+}
+
+impl Vertex {
+    fn new(a: Point, b: Point, i: usize) -> Self {
+        Vertex {
+            a,
+            b,
+            triangle_index: i,
+        }
+    }
+
+    fn is_larger(self, vertex: Vertex) -> bool {
+        if self.a.is_larger(vertex.a) {
+            return true;
+        }
+        if vertex.a.is_larger(self.a) {
+            return false;
+        }
+
+        self.b.is_larger(vertex.b)
+    }
 }
 
 struct Graph {
@@ -60,10 +82,8 @@ struct Graph {
 }
 
 impl Graph {
-    fn new(vertex_count: usize) -> Self {
-        Graph {
-            adjacency_list: Vec::with_capacity(vertex_count),
-        }
+    fn new(adjacency_list: Vec<Vec<Vertex>>) -> Self {
+        Graph { adjacency_list }
     }
 
     fn push(value: f32) {}
@@ -109,44 +129,63 @@ fn load_mesh(filename: &str) -> Mesh {
     mesh
 }
 
-fn compare_points(points: (Point, Point)) -> (Point, Point) {
-    if points.0.x > points.1.x {
-        return (points.0, points.1);
-    } else if points.0.x == points.1.x {
-        if points.0.y > points.1.y {
-            return (points.0, points.1);
-        } else if points.0.y == points.1.y {
-            if points.0.z > points.1.z {
-                return (points.0, points.1);
-            }
-        }
-    }
-
-    (points.1, points.0)
-}
-
 fn build_adjacency(mesh: &Mesh) -> Vec<Vec<Vertex>> {
     let mut vertices: Vec<Vertex> = Vec::with_capacity(mesh.len() * 3);
 
     for (i, triangle) in mesh.triangles.iter().enumerate() {
         for j in 0..3 {
-            let points: (Point, Point) = if j < 2 {
-                triangle[j].compare_with(triangle[j + 1])
+            if triangle[j].is_larger(triangle[(j + 1) % 3]) {
+                vertices.push(Vertex::new(triangle[j], triangle[(j + 1) % 3], i));
             } else {
-                triangle[j].compare_with(triangle[0])
-            };
-
-            vertices.push(Vertex {
-                a: points.0,
-                b: points.1,
-                triangle_index: i,
-            });
+                vertices.push(Vertex::new(triangle[(j + 1) % 3], triangle[j], i));
+            }
         }
     }
 
+    let sorted_vertices = merge_sort(&vertices);
+
     let mut adjacency_list = Vec::with_capacity(mesh.len());
 
+    let mut i = 0;
+    while i <= sorted_vertices.len() {
+        let mut j = i + 1;
+        while j <= sorted_vertices.len() {}
+    }
+
     adjacency_list
+}
+
+fn merge_sort(list: &[Vertex]) -> Vec<Vertex> {
+    if list.len() > 1 {
+        return list.to_vec();
+    }
+
+    let mid = list.len() / 2;
+    let left = merge_sort(&list[..mid]);
+    let right = merge_sort(list);
+
+    merge(&left, &right)
+}
+
+fn merge(left: &[Vertex], right: &[Vertex]) -> Vec<Vertex> {
+    let mut sorted_list = Vec::new();
+
+    let mut i = 0;
+    let mut j = 0;
+
+    while i < left.len() && j < right.len() {
+        if left[i].is_larger(right[j]) {
+            sorted_list.push(left[i]);
+            i += 1;
+        } else {
+            sorted_list.push(right[j]);
+            j += 1;
+        }
+    }
+    sorted_list.append(&mut left[i..].to_vec());
+    sorted_list.append(&mut right[j..].to_vec());
+
+    sorted_list
 }
 
 fn display_answer(days: u32) {
@@ -167,5 +206,5 @@ fn main() {
 
     let mesh = load_mesh("mesh/bunny.txt");
 
-    load_graph(&mesh);
+    let graph = Graph::new(build_adjacency(&mesh));
 }
