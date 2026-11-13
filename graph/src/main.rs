@@ -75,6 +75,10 @@ impl Vertex {
 
         self.b.is_larger(vertex.b)
     }
+
+    fn same_edge(&self, vertex: &Vertex) -> bool {
+        !self.is_larger(*vertex) && !vertex.is_larger(*self)
+    }
 }
 
 struct Graph {
@@ -85,8 +89,6 @@ impl Graph {
     fn new(adjacency_list: Vec<Vec<Vertex>>) -> Self {
         Graph { adjacency_list }
     }
-
-    fn push(value: f32) {}
 }
 
 fn load_mesh(filename: &str) -> Mesh {
@@ -144,12 +146,29 @@ fn build_adjacency(mesh: &Mesh) -> Vec<Vec<Vertex>> {
 
     let sorted_vertices = merge_sort(&vertices);
 
-    let mut adjacency_list = Vec::with_capacity(mesh.len());
+    let mut adjacency_list: Vec<Vec<Vertex>> = vec![Vec::new(); mesh.len()];
 
     let mut i = 0;
-    while i <= sorted_vertices.len() {
+    while i < sorted_vertices.len() {
         let mut j = i + 1;
-        while j <= sorted_vertices.len() {}
+        while j < sorted_vertices.len() && sorted_vertices[i].same_edge(&sorted_vertices[j]) {
+            j += 1;
+        }
+
+        for x in i..j {
+            for y in i..j {
+                if x != y {
+                    println!(
+                        "{:?}, {:?}",
+                        sorted_vertices[x].triangle_index,
+                        adjacency_list.len()
+                    );
+                    adjacency_list[sorted_vertices[x].triangle_index].push(sorted_vertices[y]);
+                }
+            }
+        }
+
+        i = j;
     }
 
     adjacency_list
