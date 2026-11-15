@@ -108,26 +108,12 @@ impl Dictionary {
     }
 
     fn remove(&mut self, key: &str) -> Option<i32> {
-        if self.is_empty() {
-            return None;
-        }
-
-        let mut current = self.root;
+        let node = self.find(key);
         unsafe {
-            while !current.is_null() {
-                if (*current).key.as_str() > key {
-                    current = (*current).left_child;
-                } else if (*current).key.as_str() < key {
-                    current = (*current).right_child;
-                } else {
-                    if (*current).deleted {
-                        return None;
-                    }
-
-                    (*current).deleted = true;
-                    self.size -= 1;
-                    return Some((*current).value);
-                }
+            if !node.is_null() {
+                (*node).deleted = true;
+                self.size -= 1;
+                return Some((*node).value);
             }
         }
 
@@ -135,23 +121,10 @@ impl Dictionary {
     }
 
     fn get(&self, key: &str) -> Option<i32> {
-        if self.is_empty() {
-            return None;
-        }
-
-        let mut current = self.root;
+        let node = self.find(key);
         unsafe {
-            while !current.is_null() {
-                if (*current).key.as_str() > key {
-                    current = (*current).left_child;
-                } else if (*current).key.as_str() < key {
-                    current = (*current).right_child;
-                } else {
-                    if (*current).deleted {
-                        return None;
-                    }
-                    return Some((*current).value);
-                }
+            if !node.is_null() {
+                return Some((*node).value);
             }
         }
 
@@ -159,8 +132,12 @@ impl Dictionary {
     }
 
     fn contains(&self, key: &str) -> bool {
+        !self.find(key).is_null()
+    }
+
+    fn find(&self, key: &str) -> *mut Node {
         if self.is_empty() {
-            return false;
+            return std::ptr::null_mut();
         }
 
         let mut current = self.root;
@@ -172,14 +149,14 @@ impl Dictionary {
                     current = (*current).right_child;
                 } else {
                     if (*current).deleted {
-                        return false;
+                        return std::ptr::null_mut();
                     }
-                    return true;
+                    return current;
                 }
             }
         }
 
-        false
+        std::ptr::null_mut()
     }
 
     fn min(&self) -> Option<(String, i32)> {
@@ -247,9 +224,9 @@ fn in_order_traverse(f: &mut std::fmt::Formatter<'_>, node: *mut Node) -> std::f
 
 impl std::fmt::Display for Dictionary {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{{ ")?;
+        writeln!(f, "{{")?;
         in_order_traverse(f, self.root)?;
-        writeln!(f, "}}")
+        write!(f, "}}")
     }
 }
 
