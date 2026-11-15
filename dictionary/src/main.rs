@@ -28,6 +28,7 @@ impl Dictionary {
     fn new() -> Self {
         Dictionary {
             root: std::ptr::null_mut(),
+            size: 0,
         }
     }
 
@@ -37,7 +38,26 @@ impl Dictionary {
 
     fn get(&self, key: &str) -> Option<i32> {}
 
-    fn contains(&self, key: &str) -> bool {}
+    fn contains(&self, key: &str) -> bool {
+        if self.is_empty() { return false; }
+
+        let mut current = self.root;
+        unsafe {
+            while !current.is_null() {
+                if (*current).key > key.to_string() {
+                    current = (*current).left_child;
+                }
+                else if (*current).key < key.to_string() {
+                    current = (*current).right_child;
+                }
+                else {
+                    return true;
+                }
+            }
+        }
+
+        false
+    }
 
     fn min(&self) -> Option<(String, i32)> {
         if self.is_empty() { return None; }
