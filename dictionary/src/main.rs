@@ -32,23 +32,52 @@ impl Dictionary {
         }
     }
 
-    fn insert(&mut self, key: String, value: i32) {}
+    fn insert(&mut self, key: String, value: i32) {
+        if self.is_empty() {
+            self.root = Node::new(key, value);
+            self.size += 1;
+            return;
+        }
+
+        let mut current = self.root;
+        unsafe {
+            loop {
+                if (*current).key > key {
+                    if (*current).left_child.is_null() {
+                        (*current).left_child = Node::new(key.clone(), value);
+                        self.size += 1;
+                        return;
+                    }
+                    current = (*current).left_child;
+                } else if (*current).key < key {
+                    if (*current).right_child.is_null() {
+                        (*current).right_child = Node::new(key.clone(), value);
+                        self.size += 1;
+                        return;
+                    }
+                } else {
+                    (*current).value = value;
+                    return;
+                }
+            }
+        }
+    }
 
     fn remove(&mut self, key: &str) -> Option<i32> {}
 
     fn get(&self, key: &str) -> Option<i32> {
-        if self.is_empty() { return None; }
+        if self.is_empty() {
+            return None;
+        }
 
         let mut current = self.root;
         unsafe {
             while !current.is_null() {
                 if (*current).key > key.to_string() {
                     current = (*current).left_child;
-                }
-                else if (*current).key < key.to_string() {
+                } else if (*current).key < key.to_string() {
                     current = (*current).right_child;
-                }
-                else {
+                } else {
                     return Some((*current).value);
                 }
             }
@@ -58,18 +87,18 @@ impl Dictionary {
     }
 
     fn contains(&self, key: &str) -> bool {
-        if self.is_empty() { return false; }
+        if self.is_empty() {
+            return false;
+        }
 
         let mut current = self.root;
         unsafe {
             while !current.is_null() {
                 if (*current).key > key.to_string() {
                     current = (*current).left_child;
-                }
-                else if (*current).key < key.to_string() {
+                } else if (*current).key < key.to_string() {
                     current = (*current).right_child;
-                }
-                else {
+                } else {
                     return true;
                 }
             }
@@ -79,7 +108,9 @@ impl Dictionary {
     }
 
     fn min(&self) -> Option<(String, i32)> {
-        if self.is_empty() { return None; }
+        if self.is_empty() {
+            return None;
+        }
 
         let mut current = self.root;
         unsafe {
@@ -92,7 +123,9 @@ impl Dictionary {
     }
 
     fn max(&self) -> Option<(String, i32)> {
-        if self.is_empty() { return None; }
+        if self.is_empty() {
+            return None;
+        }
 
         let mut current = self.root;
         unsafe {
