@@ -106,6 +106,9 @@ impl Dictionary {
                 } else if (*current).key < key.to_string() {
                     current = (*current).right_child;
                 } else {
+                    if (*current).deleted {
+                        return None;
+                    }
                     return Some((*current).value);
                 }
             }
@@ -127,6 +130,9 @@ impl Dictionary {
                 } else if (*current).key < key.to_string() {
                     current = (*current).right_child;
                 } else {
+                    if (*current).deleted {
+                        return false;
+                    }
                     return true;
                 }
             }
@@ -176,4 +182,54 @@ impl Dictionary {
 
 fn main() {
     let mut dictionary = Dictionary::new();
+
+    if dictionary.is_empty() {
+        println!("This dictionary is empty.");
+    }
+    else {
+        println!("This dictionary is not empty.");
+    }
+
+    dictionary.insert("age".to_string(), 19);
+
+    println!("The size of the dictionary is: {}.", dictionary.size());
+
+    dictionary.insert("height".to_string(), 186);
+    dictionary.insert("weight".to_string(), 87);
+
+
+    dictionary.insert("height".to_string(), 187);
+
+    dictionary.insert("speed".to_string(), 22);
+
+    dictionary.remove("weight");
+
+    let key = "height";
+    let got = dictionary.get(key);
+    if let Some(x) = got {
+        println!("The value for key: {} is {}.", key, x);
+    } else {
+        println!("Dictionary has no value for key: {}.", key)
+    }
+
+    if dictionary.contains("length") {
+        println!("This dictionary contains the key: {}.", key);
+    }
+    else {
+        println!("This dictionary does not contain the key: {}.", key);
+    }
+
+    let minimum = dictionary.min();
+    if let Some((key, value)) = minimum {
+        println!("The minimum of this dictionary is key: {}, value: {}.", key, value)
+    } else {
+        println!("Dictionary has no minimum.")
+    }
+
+    let maximum = dictionary.max();
+    if let Some((key, value)) = maximum {
+        println!("The maximum of this dictionary is key: {}, value: {}.", key, value)
+    } else {
+        println!("Dictionary has no maximum.")
+    }
 }
