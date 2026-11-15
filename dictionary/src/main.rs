@@ -11,13 +11,50 @@ impl Node {
         let layout = std::alloc::Layout::new::<Node>();
         unsafe {
             let pointer: *mut Node = std::alloc::alloc(layout) as *mut Node;
-            (*pointer).key = key;
-            (*pointer).value = value;
-            (*pointer).deleted = false;
-            (*pointer).left_child = std::ptr::null_mut();
-            (*pointer).right_child = std::ptr::null_mut();
-            pointer as *mut Node
+            if pointer.is_null() {
+                std::alloc::handle_alloc_error(layout);
+            }
+            pointer.write(Node {
+                key,
+                value,
+                deleted: false,
+                left_child: std::ptr::null_mut(),
+                right_child: std::ptr::null_mut(),
+            });
+            pointer
         }
+    }
+}
+
+fn find_min(node: *mut Node) -> *mut Node {
+    if node.is_null() {
+        return node;
+    }
+    unsafe {
+        let left = find_min((*node).left_child);
+        if !left.is_null() {
+            return left;
+        }
+        if !(*node).deleted {
+            return node;
+        }
+        find_min((*node).right_child)
+    }
+}
+
+fn find_max(node: *mut Node) -> *mut Node {
+    if node.is_null() {
+        return node;
+    }
+    unsafe {
+        let right = find_max((*node).right_child);
+        if !right.is_null() {
+            return right;
+        }
+        if !(*node).deleted {
+            return node;
+        }
+        find_max((*node).left_child)
     }
 }
 
@@ -35,7 +72,7 @@ impl Dictionary {
     }
 
     fn insert(&mut self, key: String, value: i32) {
-        if self.is_empty() {
+        if self.root.is_null() {
             self.root = Node::new(key, value);
             self.size += 1;
             return;
@@ -57,9 +94,13 @@ impl Dictionary {
                         self.size += 1;
                         return;
                     }
+                    current = (*current).right_child;
                 } else {
+                    if (*current).deleted {
+                        (*current).deleted = false;
+                        self.size += 1;
+                    }
                     (*current).value = value;
-                    (*current).deleted = false;
                     return;
                 }
             }
@@ -74,9 +115,9 @@ impl Dictionary {
         let mut current = self.root;
         unsafe {
             while !current.is_null() {
-                if (*current).key > key.to_string() {
+                if (*current).key.as_str() > key {
                     current = (*current).left_child;
-                } else if (*current).key < key.to_string() {
+                } else if (*current).key.as_str() < key {
                     current = (*current).right_child;
                 } else {
                     if (*current).deleted {
@@ -101,9 +142,9 @@ impl Dictionary {
         let mut current = self.root;
         unsafe {
             while !current.is_null() {
-                if (*current).key > key.to_string() {
+                if (*current).key.as_str() > key {
                     current = (*current).left_child;
-                } else if (*current).key < key.to_string() {
+                } else if (*current).key.as_str() < key {
                     current = (*current).right_child;
                 } else {
                     if (*current).deleted {
@@ -125,9 +166,9 @@ impl Dictionary {
         let mut current = self.root;
         unsafe {
             while !current.is_null() {
-                if (*current).key > key.to_string() {
+                if (*current).key.as_str() > key {
                     current = (*current).left_child;
-                } else if (*current).key < key.to_string() {
+                } else if (*current).key.as_str() < key {
                     current = (*current).right_child;
                 } else {
                     if (*current).deleted {
@@ -142,33 +183,19 @@ impl Dictionary {
     }
 
     fn min(&self) -> Option<(String, i32)> {
-        if self.is_empty() {
+        let node = find_min(self.root);
+        if node.is_null() {
             return None;
         }
-
-        let mut current = self.root;
-        unsafe {
-            while !(*current).left_child.is_null() {
-                current = (*current).left_child;
-            }
-
-            Some(((*current).key.clone(), (*current).value))
-        }
+        unsafe { Some(((*node).key.clone(), (*node).value)) }
     }
 
     fn max(&self) -> Option<(String, i32)> {
-        if self.is_empty() {
+        let node = find_max(self.root);
+        if node.is_null() {
             return None;
         }
-
-        let mut current = self.root;
-        unsafe {
-            while !(*current).right_child.is_null() {
-                current = (*current).right_child;
-            }
-
-            Some(((*current).key.clone(), (*current).value))
-        }
+        unsafe { Some(((*node).key.clone(), (*node).value)) }
     }
 
     fn size(&self) -> u32 {
@@ -176,7 +203,7 @@ impl Dictionary {
     }
 
     fn is_empty(&self) -> bool {
-        self.root.is_null()
+        self.size == 0
     }
 }
 
@@ -185,8 +212,7 @@ fn main() {
 
     if dictionary.is_empty() {
         println!("This dictionary is empty.");
-    }
-    else {
+    } else {
         println!("This dictionary is not empty.");
     }
 
@@ -196,7 +222,6 @@ fn main() {
 
     dictionary.insert("height".to_string(), 186);
     dictionary.insert("weight".to_string(), 87);
-
 
     dictionary.insert("height".to_string(), 187);
 
@@ -212,23 +237,29 @@ fn main() {
         println!("Dictionary has no value for key: {}.", key)
     }
 
-    if dictionary.contains("length") {
-        println!("This dictionary contains the key: {}.", key);
-    }
-    else {
-        println!("This dictionary does not contain the key: {}.", key);
+    let key_2 = "length";
+    if dictionary.contains(key_2) {
+        println!("This dictionary contains the key: {}.", key_2);
+    } else {
+        println!("This dictionary does not contain the key: {}.", key_2);
     }
 
     let minimum = dictionary.min();
     if let Some((key, value)) = minimum {
-        println!("The minimum of this dictionary is key: {}, value: {}.", key, value)
+        println!(
+            "The minimum of this dictionary is key: {}, value: {}.",
+            key, value
+        )
     } else {
         println!("Dictionary has no minimum.")
     }
 
     let maximum = dictionary.max();
     if let Some((key, value)) = maximum {
-        println!("The maximum of this dictionary is key: {}, value: {}.", key, value)
+        println!(
+            "The maximum of this dictionary is key: {}, value: {}.",
+            key, value
+        )
     } else {
         println!("Dictionary has no maximum.")
     }
