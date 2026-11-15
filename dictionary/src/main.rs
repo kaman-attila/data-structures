@@ -1,3 +1,5 @@
+use std::alloc::Layout;
+
 struct Node {
     key: String,
     value: i32,
@@ -207,6 +209,33 @@ impl Dictionary {
     }
 }
 
+fn help_drop(node: *mut Node, layout: Layout) {
+    if node.is_null() {
+        return;
+    }
+
+    unsafe {
+        if !(*node).left_child.is_null() {
+            help_drop((*node).left_child, layout);
+        }
+
+        if !(*node).right_child.is_null() {
+            help_drop((*node).right_child, layout);
+        }
+
+        std::ptr::drop_in_place(node);
+        std::alloc::dealloc(node as *mut u8, layout);
+    }
+}
+
+impl Drop for Dictionary {
+    fn drop(&mut self) {
+        let layout = std::alloc::Layout::new::<Node>();
+
+        help_drop(self.root, layout);
+    }
+}
+
 fn main() {
     let mut dictionary = Dictionary::new();
 
@@ -263,4 +292,6 @@ fn main() {
     } else {
         println!("Dictionary has no maximum.")
     }
+
+    drop(dictionary);
 }
