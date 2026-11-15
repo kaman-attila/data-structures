@@ -269,4 +269,6 @@ fn main() {
     } else {
         println!("Tailed linked list has no value at position {}", index)
     }
+
+    drop(tll);
 }
