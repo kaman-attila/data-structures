@@ -29,6 +29,22 @@ impl Dictionary {
             root: std::ptr::null_mut(),
         }
     }
+
+    fn insert(&mut self, key: String, value: i32) {}
+
+    fn remove(&mut self, key: String) -> Option<i32> {}
+
+    fn get(&self, key: String) -> Option<i32> {}
+
+    fn contains(&self, key: String) -> bool {}
+
+    fn min(&self) -> Option<(String, i32)> {}
+
+    fn max(&self) -> Option<(String, i32)> {}
+
+    fn size(&self) -> u32 {}
+
+    fn is_empty(&self) -> bool {}
 }
 
 fn main() {
