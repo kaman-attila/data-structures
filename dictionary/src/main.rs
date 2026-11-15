@@ -1,5 +1,3 @@
-use std::alloc::Layout;
-
 struct Node {
     key: String,
     value: i32,
@@ -209,19 +207,14 @@ impl Dictionary {
     }
 }
 
-fn help_drop(node: *mut Node, layout: Layout) {
+fn help_drop(node: *mut Node, layout: std::alloc::Layout) {
     if node.is_null() {
         return;
     }
 
     unsafe {
-        if !(*node).left_child.is_null() {
-            help_drop((*node).left_child, layout);
-        }
-
-        if !(*node).right_child.is_null() {
-            help_drop((*node).right_child, layout);
-        }
+        help_drop((*node).left_child, layout);
+        help_drop((*node).right_child, layout);
 
         std::ptr::drop_in_place(node);
         std::alloc::dealloc(node as *mut u8, layout);
@@ -236,8 +229,33 @@ impl Drop for Dictionary {
     }
 }
 
+fn in_order_traverse(f: &mut std::fmt::Formatter<'_>, node: *mut Node) -> std::fmt::Result {
+    if node.is_null() {
+        return Ok(());
+    }
+
+    unsafe {
+        in_order_traverse(f, (*node).left_child)?;
+
+        if !(*node).deleted {
+            writeln!(f, "    {}: {},", (*node).key, (*node).value)?;
+        }
+
+        in_order_traverse(f, (*node).right_child)
+    }
+}
+
+impl std::fmt::Display for Dictionary {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{{ ")?;
+        in_order_traverse(f, self.root)?;
+        writeln!(f, "}}")
+    }
+}
+
 fn main() {
     let mut dictionary = Dictionary::new();
+    println!("{}", dictionary);
 
     if dictionary.is_empty() {
         println!("This dictionary is empty.");
@@ -246,17 +264,22 @@ fn main() {
     }
 
     dictionary.insert("age".to_string(), 19);
+    println!("{}", dictionary);
 
     println!("The size of the dictionary is: {}.", dictionary.size());
 
     dictionary.insert("height".to_string(), 186);
     dictionary.insert("weight".to_string(), 87);
+    println!("{}", dictionary);
 
     dictionary.insert("height".to_string(), 187);
+    println!("{}", dictionary);
 
     dictionary.insert("speed".to_string(), 22);
+    println!("{}", dictionary);
 
     dictionary.remove("weight");
+    println!("{}", dictionary);
 
     let key = "height";
     let got = dictionary.get(key);
