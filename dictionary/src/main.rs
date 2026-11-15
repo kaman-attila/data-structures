@@ -39,9 +39,31 @@ impl Dictionary {
 
     fn contains(&self, key: &str) -> bool {}
 
-    fn min(&self) -> Option<(String, i32)> {}
+    fn min(&self) -> Option<(String, i32)> {
+        if self.is_empty() { return None; }
 
-    fn max(&self) -> Option<(String, i32)> {}
+        let mut current = self.root;
+        unsafe {
+            while !(*current).left_child.is_null() {
+                current = (*current).left_child;
+            }
+
+            Some(((*current).key.clone(), (*current).value))
+        }
+    }
+
+    fn max(&self) -> Option<(String, i32)> {
+        if self.is_empty() { return None; }
+
+        let mut current = self.root;
+        unsafe {
+            while !(*current).right_child.is_null() {
+                current = (*current).right_child;
+            }
+
+            Some(((*current).key.clone(), (*current).value))
+        }
+    }
 
     fn size(&self) -> u32 {
         self.size
