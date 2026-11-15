@@ -1,6 +1,7 @@
 struct Node {
     key: String,
     value: i32,
+    deleted: bool,
     left_child: *mut Node,
     right_child: *mut Node,
 }
@@ -12,6 +13,7 @@ impl Node {
             let pointer: *mut Node = std::alloc::alloc(layout) as *mut Node;
             (*pointer).key = key;
             (*pointer).value = value;
+            (*pointer).deleted = false;
             (*pointer).left_child = std::ptr::null_mut();
             (*pointer).right_child = std::ptr::null_mut();
             pointer as *mut Node
@@ -44,26 +46,52 @@ impl Dictionary {
             loop {
                 if (*current).key > key {
                     if (*current).left_child.is_null() {
-                        (*current).left_child = Node::new(key.clone(), value);
+                        (*current).left_child = Node::new(key, value);
                         self.size += 1;
                         return;
                     }
                     current = (*current).left_child;
                 } else if (*current).key < key {
                     if (*current).right_child.is_null() {
-                        (*current).right_child = Node::new(key.clone(), value);
+                        (*current).right_child = Node::new(key, value);
                         self.size += 1;
                         return;
                     }
                 } else {
                     (*current).value = value;
+                    (*current).deleted = false;
                     return;
                 }
             }
         }
     }
 
-    fn remove(&mut self, key: &str) -> Option<i32> {}
+    fn remove(&mut self, key: &str) -> Option<i32> {
+        if self.is_empty() {
+            return None;
+        }
+
+        let mut current = self.root;
+        unsafe {
+            while !current.is_null() {
+                if (*current).key > key.to_string() {
+                    current = (*current).left_child;
+                } else if (*current).key < key.to_string() {
+                    current = (*current).right_child;
+                } else {
+                    if (*current).deleted {
+                        return None;
+                    }
+
+                    (*current).deleted = true;
+                    self.size -= 1;
+                    return Some((*current).value);
+                }
+            }
+        }
+
+        None
+    }
 
     fn get(&self, key: &str) -> Option<i32> {
         if self.is_empty() {
