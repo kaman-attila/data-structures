@@ -5,14 +5,15 @@ enum VertexColor {
     BLACK,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 struct Vertex {
     id: usize,
+    name: char,
 }
 
 impl Vertex {
-    fn new(id: usize) -> Self {
-        Vertex { id: id }
+    fn new(id: usize, name: char) -> Self {
+        Vertex { id: id, name: name }
     }
 }
 
@@ -41,9 +42,9 @@ impl WeightedGraph {
         }
     }
 
-    fn add_vertex(&mut self) -> Vertex {
+    fn add_vertex(&mut self, name: char) -> Vertex {
         let id = self.adjacency_list.len();
-        let vertex = Vertex::new(id);
+        let vertex = Vertex::new(id, name);
         self.vertices.push(vertex);
         self.adjacency_list.push(Vec::new());
         vertex
@@ -51,6 +52,23 @@ impl WeightedGraph {
 
     fn add_arc(&mut self, start: Vertex, end: Vertex, weight: i32) {
         self.adjacency_list[start.id].push(Arc::new(end, weight));
+    }
+
+    fn print_shortest_path_between(&self, start: Vertex, end: Vertex) {
+        if let Some(path) = self.shortest_path(start, end) {
+            print!(
+                "The shortest path between {} and {} is: ",
+                start.name, end.name
+            );
+            for vertex in path {
+                print!("{} -> ", vertex.name);
+            }
+
+            print!("Done!\n");
+            return;
+        }
+
+        println!("It seems like the graph has no shortest path between");
     }
 
     fn shortest_path(&self, start: Vertex, end: Vertex) -> Option<Vec<Vertex>> {
@@ -251,14 +269,14 @@ impl WeightedGraph {
 fn main() {
     let mut weighted_graph = WeightedGraph::new();
 
-    let vertex_a = weighted_graph.add_vertex();
-    let vertex_b = weighted_graph.add_vertex();
-    let vertex_c = weighted_graph.add_vertex();
-    let vertex_d = weighted_graph.add_vertex();
-    let vertex_e = weighted_graph.add_vertex();
-    let vertex_f = weighted_graph.add_vertex();
-    let vertex_g = weighted_graph.add_vertex();
-    let vertex_h = weighted_graph.add_vertex();
+    let vertex_a = weighted_graph.add_vertex('A');
+    let vertex_b = weighted_graph.add_vertex('B');
+    let vertex_c = weighted_graph.add_vertex('C');
+    let vertex_d = weighted_graph.add_vertex('D');
+    let vertex_e = weighted_graph.add_vertex('E');
+    let vertex_f = weighted_graph.add_vertex('F');
+    let vertex_g = weighted_graph.add_vertex('G');
+    let vertex_h = weighted_graph.add_vertex('H');
 
     weighted_graph.add_arc(vertex_a, vertex_b, 3);
     weighted_graph.add_arc(vertex_a, vertex_c, 4);
@@ -271,7 +289,5 @@ fn main() {
     weighted_graph.add_arc(vertex_f, vertex_g, 1);
     weighted_graph.add_arc(vertex_g, vertex_h, 1);
 
-    let shortest_path = weighted_graph.shortest_path(vertex_a, vertex_h);
-
-    //println!("Shortest pat from A to H is: {:?}", shortest_path);
+    weighted_graph.print_shortest_path_between(vertex_a, vertex_h);
 }
