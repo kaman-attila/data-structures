@@ -8,11 +8,15 @@ enum VertexColor {
 #[derive(Clone, Copy)]
 struct Vertex {
     id: usize,
+    color: VertexColor,
 }
 
 impl Vertex {
     fn new(id: usize) -> Self {
-        Vertex { id: id }
+        Vertex {
+            id: id,
+            color: VertexColor::WHITE,
+        }
     }
 }
 
@@ -29,6 +33,7 @@ impl Arc {
 }
 
 struct WeightedGraph {
+    vertices: Vec<Vertex>,
     adjacency_list: Vec<Vec<Arc>>,
 }
 
@@ -51,17 +56,19 @@ impl WeightedGraph {
     }
 
     fn shortest_path(&self, start: &mut Vertex, end: &mut Vertex) -> Option<Vec<Arc>> {
+        if let Some(x) = self.topological_sort() {
+            return x;
+        }
         self.topological_sort()
     }
 
-    fn topological_sort(&self) -> Option<Vec<usize>> {
+    fn topological_sort(&self) -> Option<Vec<Vertex>> {
         let n = self.adjacency_list.len();
-        let mut vertex_colors = vec![VertexColor::WHITE; n];
         let mut post_order = Vec::with_capacity(n);
 
         for i in 0..n {
-            if vertex_colors[i] == VertexColor::WHITE {
-                if !self.depth_first_search(i, &mut vertex_colors, &mut post_order) {
+            if self.vertices[i].color == VertexColor::WHITE {
+                if !self.depth_first_search(i, &mut post_order) {
                     return None;
                 }
             }
@@ -71,25 +78,20 @@ impl WeightedGraph {
         Some(post_order)
     }
 
-    fn depth_first_search(
-        &self,
-        start: usize,
-        vertex_colors: &mut [VertexColor],
-        post_order: &mut Vec<usize>,
-    ) -> bool {
-        vertex_colors[start] = VertexColor::GREY;
+    fn depth_first_search(&self, start: usize, post_order: &mut Vec<Vertex>) -> bool {
+        let mut start_vertex = self.vertices[start];
+        start_vertex.color = VertexColor::GREY;
 
-        for arc in &self.adjacency_list[start] {
-            let v = arc.end.id;
-            match vertex_colors[v] {
-                VertexColor::WHITE => self.depth_first_search(v, vertex_colors, post_order),
+        for arc in &self.adjacency_list[start_vertex.id] {
+            let v = arc.end;
+            match v.color {
+                VertexColor::WHITE => self.depth_first_search(v.id, post_order),
                 VertexColor::GREY => return false,
                 VertexColor::BLACK => continue,
             };
         }
 
-        vertex_colors[start] = VertexColor::BLACK;
-        post_order.push(start);
+        post_order.push(start_vertex);
         true
     }
 }
