@@ -53,6 +53,25 @@ impl WeightedGraph {
     fn shortest_path(&self, start: &mut Vertex, end: &mut Vertex) -> Option<Vec<Arc>> {
         self.topological_sort()
     }
+
+    fn topological_sort(&self) -> Option<Vec<usize>> {
+        let n = self.adjacency_list.len();
+        let mut vertex_colors = vec![VertexColor::WHITE; n];
+        let mut post_order = Vec::with_capacity(n);
+
+        for i in 0..n {
+            if vertex_colors[i] == VertexColor::WHITE {
+                if !self.depth_first_search(i, &mut vertex_colors, &mut post_order) {
+                    return None;
+                }
+            }
+        }
+
+        post_order.reverse();
+        Some(post_order)
+    }
+
+    fn depth_first_search(&self, start: usize, vertex_colors: &mut [VertexColor], post_order: &mut Vec<usize>) -> bool {}
 }
 
 fn main() {
