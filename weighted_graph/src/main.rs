@@ -1,25 +1,18 @@
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum VertexColor {
     WHITE,
     GREY,
     BLACK,
 }
 
+#[derive(Clone, Copy)]
 struct Vertex {
     id: usize,
-    color: VertexColor,
 }
 
 impl Vertex {
-    fn new(mut id_counter: usize) -> Self {
-        id_counter += 1;
-        Vertex {
-            id: id_counter,
-            color: VertexColor::WHITE,
-        }
-    }
-
-    fn recolor(&mut self, new_color: VertexColor) {
-        self.color = new_color;
+    fn new(id: usize) -> Self {
+        Vertex { id: id }
     }
 }
 
@@ -46,11 +39,20 @@ impl WeightedGraph {
         }
     }
 
-    fn add_arc(&mut self, start: &Vertex, end: &Vertex, weight: i32) {
-        self.adjacency_list[start.id].push(Arc { start, end, weight });
+    fn add_vertex(&mut self) -> Vertex {
+        let id = self.adjacency_list.len();
+        let vertex = Vertex::new(id);
+        self.adjacency_list.push(Vec::new());
+        vertex
     }
 
-    fn shortest_path(start: &mut Vertex, end: &mut Vertex) -> Vec<Arc> {}
+    fn add_arc(&mut self, start: Vertex, end: Vertex, weight: i32) {
+        self.adjacency_list[start.id].push(Arc::new(start, end, weight));
+    }
+
+    fn shortest_path(&self, start: &mut Vertex, end: &mut Vertex) -> Option<Vec<Arc>> {
+        self.topological_sort()
+    }
 }
 
 fn main() {
@@ -58,23 +60,27 @@ fn main() {
 
     let mut id_counter = 0;
 
-    let vertex_a = Vertex::new(id_counter);
-    let vertex_b = Vertex::new(id_counter);
-    let vertex_c = Vertex::new(id_counter);
-    let vertex_d = Vertex::new(id_counter);
-    let vertex_e = Vertex::new(id_counter);
-    let vertex_f = Vertex::new(id_counter);
-    let vertex_g = Vertex::new(id_counter);
-    let vertex_h = Vertex::new(id_counter);
+    let vertex_a = weighted_graph.add_vertex();
+    let vertex_b = weighted_graph.add_vertex();
+    let vertex_c = weighted_graph.add_vertex();
+    let vertex_d = weighted_graph.add_vertex();
+    let vertex_e = weighted_graph.add_vertex();
+    let vertex_f = weighted_graph.add_vertex();
+    let vertex_g = weighted_graph.add_vertex();
+    let vertex_h = weighted_graph.add_vertex();
 
-    weighted_graph.add_arc(&vertex_a, &vertex_b, 3);
-    weighted_graph.add_arc(&vertex_a, &vertex_c, 4);
-    weighted_graph.add_arc(&vertex_c, &vertex_b, -4);
-    weighted_graph.add_arc(&vertex_c, &vertex_d, 2);
-    weighted_graph.add_arc(&vertex_b, &vertex_d, 4);
-    weighted_graph.add_arc(&vertex_d, &vertex_h, 9);
-    weighted_graph.add_arc(&vertex_a, &vertex_e, 5);
-    weighted_graph.add_arc(&vertex_e, &vertex_f, 1);
-    weighted_graph.add_arc(&vertex_f, &vertex_g, 1);
-    weighted_graph.add_arc(&vertex_g, &vertex_h, 1);
+    weighted_graph.add_arc(vertex_a, vertex_b, 3);
+    weighted_graph.add_arc(vertex_a, vertex_c, 4);
+    weighted_graph.add_arc(vertex_c, vertex_b, -4);
+    weighted_graph.add_arc(vertex_c, vertex_d, 2);
+    weighted_graph.add_arc(vertex_b, vertex_d, 4);
+    weighted_graph.add_arc(vertex_d, vertex_h, 9);
+    weighted_graph.add_arc(vertex_a, vertex_e, 5);
+    weighted_graph.add_arc(vertex_e, vertex_f, 1);
+    weighted_graph.add_arc(vertex_f, vertex_g, 1);
+    weighted_graph.add_arc(vertex_g, vertex_h, 1);
+
+    let shortest_path = weighted_graph.shortest_path(&mut vertex_a, &mut vertex_h);
+
+    println!("Shortest pat from A to H is: {:?}", shortest_path);
 }
