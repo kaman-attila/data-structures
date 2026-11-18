@@ -57,7 +57,7 @@ impl WeightedGraph {
             Some(order) => Some(self.topological_shortest_path(start, &order)),
             None => {
                 if self.has_negative_weight() {
-                    self.belmann_ford(start)
+                    self.bellman_ford(start)
                 } else {
                     Some(self.dijkstra(start))
                 }
@@ -120,16 +120,38 @@ impl WeightedGraph {
         true
     }
 
-    fn topological_shortest_path(&self, start: Vertex, order: &[Vertex]) -> Vec<Arc> {
+    fn topological_shortest_path(
+        &self,
+        start: Vertex,
+        order: &[Vertex],
+    ) -> (Vec<i32>, Vec<Option<usize>>) {
         todo!()
     }
 
-    fn dijkstra(&self, start: Vertex) -> Vec<Arc> {
+    fn dijkstra(&self, start: Vertex) -> (Vec<i32>, Vec<Option<usize>>) {
         todo!()
     }
 
-    fn belmann_ford(&self, start: Vertex) -> Option<Vec<Arc>> {
+    fn bellman_ford(&self, start: Vertex) -> Option<(Vec<i32>, Vec<Option<usize>>)> {
         todo!()
+    }
+
+    fn relax(
+        start: usize,
+        arc: &Arc,
+        distances: &mut [i32],
+        predecessors: &mut [Option<usize>],
+    ) -> bool {
+        if distances[start] == 0 {
+            return false;
+        }
+
+        if distances[arc.end.id] > distances[start] + arc.weight {
+            distances[arc.end.id] = distances[start] + arc.weight;
+            predecessors[arc.end.id] = Some(start);
+        }
+
+        false
     }
 }
 
