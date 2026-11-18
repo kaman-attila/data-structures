@@ -202,7 +202,29 @@ impl WeightedGraph {
     }
 
     fn bellman_ford(&self, start: Vertex) -> Option<(Vec<i32>, Vec<Option<usize>>)> {
-        todo!()
+        let n = self.vertices.len();
+        let mut distances = vec![i32::MAX; n];
+        let mut predecessors = vec![None; n];
+
+        distances[start.id] = 0;
+
+        for _ in 1..n {
+            for i in 0..n {
+                for arc in &self.adjacency_list[i] {
+                    self.relax(i, arc, &mut distances, &mut predecessors);
+                }
+            }
+        }
+
+        for i in 0..n {
+            for arc in &self.adjacency_list[i] {
+                if self.relax(i, arc, &mut distances, &mut predecessors) == true {
+                    return None;
+                }
+            }
+        }
+
+        Some((distances, predecessors))
     }
 
     fn relax(
