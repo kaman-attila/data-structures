@@ -50,22 +50,22 @@ impl Mesh {
 }
 
 #[derive(Clone, Copy)]
-struct Vertex {
+struct Edge {
     a: Point,
     b: Point,
     triangle_index: usize,
 }
 
-impl Vertex {
+impl Edge {
     fn new(a: Point, b: Point, i: usize) -> Self {
-        Vertex {
+        Edge {
             a,
             b,
             triangle_index: i,
         }
     }
 
-    fn is_larger(self, vertex: Vertex) -> bool {
+    fn is_larger(self, vertex: Edge) -> bool {
         if self.a.is_larger(vertex.a) {
             return true;
         }
@@ -76,17 +76,17 @@ impl Vertex {
         self.b.is_larger(vertex.b)
     }
 
-    fn same_edge(&self, vertex: &Vertex) -> bool {
+    fn same_edge(&self, vertex: &Edge) -> bool {
         !self.is_larger(*vertex) && !vertex.is_larger(*self)
     }
 }
 
 struct Graph {
-    adjacency_list: Vec<Vec<Vertex>>,
+    adjacency_list: Vec<Vec<Edge>>,
 }
 
 impl Graph {
-    fn new(adjacency_list: Vec<Vec<Vertex>>) -> Self {
+    fn new(adjacency_list: Vec<Vec<Edge>>) -> Self {
         Graph { adjacency_list }
     }
 
@@ -168,22 +168,22 @@ fn load_mesh(filename: &str) -> Mesh {
     mesh
 }
 
-fn build_adjacency(mesh: &Mesh) -> Vec<Vec<Vertex>> {
-    let mut vertices: Vec<Vertex> = Vec::with_capacity(mesh.len() * 3);
+fn build_adjacency(mesh: &Mesh) -> Vec<Vec<Edge>> {
+    let mut vertices: Vec<Edge> = Vec::with_capacity(mesh.len() * 3);
 
     for (i, triangle) in mesh.triangles.iter().enumerate() {
         for j in 0..3 {
             if triangle[j].is_larger(triangle[(j + 1) % 3]) {
-                vertices.push(Vertex::new(triangle[j], triangle[(j + 1) % 3], i));
+                vertices.push(Edge::new(triangle[j], triangle[(j + 1) % 3], i));
             } else {
-                vertices.push(Vertex::new(triangle[(j + 1) % 3], triangle[j], i));
+                vertices.push(Edge::new(triangle[(j + 1) % 3], triangle[j], i));
             }
         }
     }
 
     let sorted_vertices = merge_sort(&vertices);
 
-    let mut adjacency_list: Vec<Vec<Vertex>> = vec![Vec::new(); mesh.len()];
+    let mut adjacency_list: Vec<Vec<Edge>> = vec![Vec::new(); mesh.len()];
 
     let mut i = 0;
     while i < sorted_vertices.len() {
@@ -206,7 +206,7 @@ fn build_adjacency(mesh: &Mesh) -> Vec<Vec<Vertex>> {
     adjacency_list
 }
 
-fn merge_sort(list: &[Vertex]) -> Vec<Vertex> {
+fn merge_sort(list: &[Edge]) -> Vec<Edge> {
     if list.len() < 2 {
         return list.to_vec();
     }
@@ -218,7 +218,7 @@ fn merge_sort(list: &[Vertex]) -> Vec<Vertex> {
     merge(&left, &right)
 }
 
-fn merge(left: &[Vertex], right: &[Vertex]) -> Vec<Vertex> {
+fn merge(left: &[Edge], right: &[Edge]) -> Vec<Edge> {
     let mut sorted_list = Vec::new();
 
     let mut i = 0;
