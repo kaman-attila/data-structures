@@ -43,6 +43,7 @@ impl WeightedGraph {
     fn add_vertex(&mut self) -> Vertex {
         let id = self.adjacency_list.len();
         let vertex = Vertex::new(id);
+        self.vertices.push(vertex);
         self.adjacency_list.push(Vec::new());
         vertex
     }
@@ -65,7 +66,15 @@ impl WeightedGraph {
     }
 
     fn has_negative_weight(&self) -> bool {
-        todo!()
+        for starting_arcs in self.adjacency_list.iter() {
+            for arc in starting_arcs {
+                if arc.weight < 0 {
+                    return true;
+                }
+            }
+        }
+
+        false
     }
 
     fn topological_sort(&self) -> Option<Vec<Vertex>> {
