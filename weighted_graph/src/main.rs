@@ -53,17 +53,32 @@ impl WeightedGraph {
         self.adjacency_list[start.id].push(Arc::new(end, weight));
     }
 
-    fn shortest_path(&self, start: Vertex, end: Vertex) -> Option<Vec<Arc>> {
-        match self.topological_sort() {
-            Some(order) => Some(self.topological_shortest_path(start, &order)),
+    fn shortest_path(&self, start: Vertex, end: Vertex) -> Option<Vec<Vertex>> {
+        let (distances, predecessors) = match self.topological_sort() {
+            Some(order) => self.topological_shortest_path(start, &order),
             None => {
                 if self.has_negative_weight() {
-                    self.bellman_ford(start)
+                    self.bellman_ford(start)?
                 } else {
-                    Some(self.dijkstra(start))
+                    self.dijkstra(start)
                 }
             }
+        };
+
+        if distances[end.id] == i32::MAX {
+            return None;
         }
+
+        let mut path = vec![];
+        let mut current = end.id;
+        while let Some(pred) = predecessors[current] {
+            path.push(self.vertices[current]);
+            current = pred;
+        }
+        path.push(self.vertices[current]);
+
+        path.reverse();
+        Some(path)
     }
 
     fn has_negative_weight(&self) -> bool {
@@ -162,6 +177,7 @@ impl WeightedGraph {
         if distances[arc.end.id] > distances[start] + arc.weight {
             distances[arc.end.id] = distances[start] + arc.weight;
             predecessors[arc.end.id] = Some(start);
+            return true;
         }
 
         false
