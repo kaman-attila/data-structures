@@ -156,7 +156,25 @@ impl WeightedGraph {
     }
 
     fn dijkstra(&self, start: Vertex) -> (Vec<i32>, Vec<Option<usize>>) {
-        todo!()
+        let mut distances = vec![i32::MAX; self.vertices.len()];
+        let mut predecessors = vec![None; self.vertices.len()];
+        let mut visited = vec![false; self.vertices.len()];
+
+        let mut smallest = self.vertices[0];
+        while distances[smallest.id] != i32::MAX {
+            for vertex in self.vertices.iter() {
+                if distances[vertex.id] < distances[vertex.id] {
+                    smallest = *vertex;
+                }
+            }
+
+            visited[smallest.id] = true;
+            for arc in self.adjacency_list[smallest.id].iter() {
+                self.relax(smallest.id, &arc, &mut distances, &mut predecessors);
+            }
+        }
+
+        return (distances, predecessors);
     }
 
     fn bellman_ford(&self, start: Vertex) -> Option<(Vec<i32>, Vec<Option<usize>>)> {
