@@ -5,6 +5,34 @@ enum VertexColor {
     BLACK,
 }
 
+struct PathResult {
+    path: Vec<Vertex>,
+    total_distance: i32,
+}
+
+impl PathResult {
+    fn new(path: Vec<Vertex>, total_distance: i32) -> Self {
+        PathResult {
+            path,
+            total_distance,
+        }
+    }
+}
+
+struct AlgorithmResult {
+    distances: Vec<i32>,
+    predecessors: Vec<Option<usize>>,
+}
+
+impl AlgorithmResult {
+    fn new(distances: Vec<i32>, predecessors: Vec<Option<usize>>) -> Self {
+        AlgorithmResult {
+            distances,
+            predecessors,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 struct Vertex {
     id: usize,
@@ -55,24 +83,29 @@ impl WeightedGraph {
     }
 
     fn print_shortest_path_between(&self, start: Vertex, end: Vertex) {
-        if let Some(path) = self.shortest_path(start, end) {
+        if let Some(result) = self.shortest_path(start, end) {
             print!(
                 "The shortest path between {} and {} is: ",
                 start.name, end.name
             );
-            for vertex in path {
+            for vertex in result.path {
                 print!("{} -> ", vertex.name);
             }
 
             print!("Done!\n");
+
+            println!("Total distance is {}.", result.total_distance);
             return;
         }
 
-        println!("It seems like the graph has no shortest path between");
+        println!(
+            "It seems like the graph has no shortest path between {} and {}.",
+            start.name, end.name
+        );
     }
 
-    fn shortest_path(&self, start: Vertex, end: Vertex) -> Option<Vec<Vertex>> {
-        let (distances, predecessors) = match self.topological_sort() {
+    fn shortest_path(&self, start: Vertex, end: Vertex) -> Option<PathResult> {
+        let result = match self.topological_sort() {
             Some(order) => self.topological_shortest_path(start, &order),
             None => {
                 if self.has_negative_weight() {
@@ -83,20 +116,20 @@ impl WeightedGraph {
             }
         };
 
-        if distances[end.id] == i32::MAX {
+        if result.distances[end.id] == i32::MAX {
             return None;
         }
 
         let mut path = vec![];
         let mut current = end.id;
-        while let Some(pred) = predecessors[current] {
+        while let Some(pred) = result.predecessors[current] {
             path.push(self.vertices[current]);
             current = pred;
         }
         path.push(self.vertices[current]);
 
         path.reverse();
-        Some(path)
+        Some(PathResult::new(path, result.distances[end.id]))
     }
 
     fn has_negative_weight(&self) -> bool {
@@ -154,11 +187,7 @@ impl WeightedGraph {
         true
     }
 
-    fn topological_shortest_path(
-        &self,
-        start: Vertex,
-        order: &[Vertex],
-    ) -> (Vec<i32>, Vec<Option<usize>>) {
+    fn topological_shortest_path(&self, start: Vertex, order: &[Vertex]) -> AlgorithmResult {
         let mut distances = vec![i32::MAX; self.vertices.len()];
         let mut predecessors = vec![None; self.vertices.len()];
 
@@ -166,14 +195,14 @@ impl WeightedGraph {
 
         for vertex in order {
             for arc in self.adjacency_list[vertex.id].iter() {
-                self.relax(vertex.id, &arc, &mut distances, &mut predecessors);
+                self.relax(vertex.id, arc, &mut distances, &mut predecessors);
             }
         }
 
-        (distances, predecessors)
+        AlgorithmResult::new(distances, predecessors)
     }
 
-    fn dijkstra(&self, start: Vertex) -> (Vec<i32>, Vec<Option<usize>>) {
+    fn dijkstra(&self, start: Vertex) -> AlgorithmResult {
         let mut distances = vec![i32::MAX; self.vertices.len()];
         let mut predecessors = vec![None; self.vertices.len()];
         let mut visited = vec![false; self.vertices.len()];
@@ -200,26 +229,20 @@ impl WeightedGraph {
                 }
             }
 
-            let Some(_) = smallest else {
+            let Some(index) = smallest else {
                 break;
             };
 
-            let vertex_index = match smallest {
-                None => break,
-                Some(index) if distances[index] == i32::MAX => break,
-                Some(index) => index,
-            };
-
-            visited[vertex_index] = true;
-            for arc in self.adjacency_list[vertex_index].iter() {
-                self.relax(vertex_index, &arc, &mut distances, &mut predecessors);
+            visited[index] = true;
+            for arc in self.adjacency_list[index].iter() {
+                self.relax(index, arc, &mut distances, &mut predecessors);
             }
         }
 
-        return (distances, predecessors);
+        AlgorithmResult::new(distances, predecessors)
     }
 
-    fn bellman_ford(&self, start: Vertex) -> Option<(Vec<i32>, Vec<Option<usize>>)> {
+    fn bellman_ford(&self, start: Vertex) -> Option<AlgorithmResult> {
         let n = self.vertices.len();
         let mut distances = vec![i32::MAX; n];
         let mut predecessors = vec![None; n];
@@ -236,13 +259,13 @@ impl WeightedGraph {
 
         for i in 0..n {
             for arc in &self.adjacency_list[i] {
-                if self.relax(i, arc, &mut distances, &mut predecessors) == true {
+                if self.relax(i, arc, &mut distances, &mut predecessors) {
                     return None;
                 }
             }
         }
 
-        Some((distances, predecessors))
+        Some(AlgorithmResult::new(distances, predecessors))
     }
 
     fn relax(
