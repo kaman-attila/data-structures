@@ -12,21 +12,18 @@ struct Vertex {
 
 impl Vertex {
     fn new(id: usize) -> Self {
-        Vertex {
-            id: id,
-        }
+        Vertex { id: id }
     }
 }
 
 struct Arc {
-    start: Vertex,
     end: Vertex,
     weight: i32,
 }
 
 impl Arc {
-    fn new(start: Vertex, end: Vertex, weight: i32) -> Self {
-        Arc { start, end, weight }
+    fn new(end: Vertex, weight: i32) -> Self {
+        Arc { end, weight }
     }
 }
 
@@ -51,17 +48,24 @@ impl WeightedGraph {
     }
 
     fn add_arc(&mut self, start: Vertex, end: Vertex, weight: i32) {
-        self.adjacency_list[start.id].push(Arc::new(start, end, weight));
+        self.adjacency_list[start.id].push(Arc::new(end, weight));
     }
 
-    fn shortest_path(&self, start: &mut Vertex, end: &mut Vertex) -> Option<Vec<Arc>> {
-        if let Some(sorted_vertices) = self.topological_sort() {
-            for vertex in sorted_vertices
+    fn shortest_path(&self, start: Vertex, end: Vertex) -> Option<Vec<Arc>> {
+        match self.topological_sort() {
+            Some(order) => Some(self.topological_shortest_path(start, &order)),
+            None => {
+                if self.has_negative_weight() {
+                    self.belmann_ford(start)
+                } else {
+                    Some(self.dijkstra(start))
+                }
+            }
         }
-        else {
+    }
 
-        }
-        return None
+    fn has_negative_weight(&self) -> bool {
+        todo!()
     }
 
     fn topological_sort(&self) -> Option<Vec<Vertex>> {
@@ -81,7 +85,12 @@ impl WeightedGraph {
         Some(post_order)
     }
 
-    fn depth_first_search(&self, start: usize, vertex_colors: &mut Vec<VertexColor>, post_order: &mut Vec<Vertex>) -> bool {
+    fn depth_first_search(
+        &self,
+        start: usize,
+        vertex_colors: &mut Vec<VertexColor>,
+        post_order: &mut Vec<Vertex>,
+    ) -> bool {
         vertex_colors[start] = VertexColor::GREY;
 
         for arc in &self.adjacency_list[start] {
@@ -102,15 +111,21 @@ impl WeightedGraph {
         true
     }
 
-    fn dijkstra(&self) {
-        while 
+    fn topological_shortest_path(&self, start: Vertex, order: &[Vertex]) -> Vec<Arc> {
+        todo!()
+    }
+
+    fn dijkstra(&self, start: Vertex) -> Vec<Arc> {
+        todo!()
+    }
+
+    fn belmann_ford(&self, start: Vertex) -> Option<Vec<Arc>> {
+        todo!()
     }
 }
 
 fn main() {
     let mut weighted_graph = WeightedGraph::new();
-
-    let mut id_counter = 0;
 
     let vertex_a = weighted_graph.add_vertex();
     let vertex_b = weighted_graph.add_vertex();
@@ -132,7 +147,7 @@ fn main() {
     weighted_graph.add_arc(vertex_f, vertex_g, 1);
     weighted_graph.add_arc(vertex_g, vertex_h, 1);
 
-    let shortest_path = weighted_graph.shortest_path(&mut vertex_a, &mut vertex_h);
+    let shortest_path = weighted_graph.shortest_path(vertex_a, vertex_h);
 
-    println!("Shortest pat from A to H is: {:?}", shortest_path);
+    //println!("Shortest pat from A to H is: {:?}", shortest_path);
 }
