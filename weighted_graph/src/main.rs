@@ -16,6 +16,7 @@ impl Vertex {
     }
 }
 
+#[derive(Clone, Copy)]
 struct Arc {
     end: Vertex,
     weight: i32,
@@ -125,7 +126,18 @@ impl WeightedGraph {
         start: Vertex,
         order: &[Vertex],
     ) -> (Vec<i32>, Vec<Option<usize>>) {
-        todo!()
+        let mut distances = vec![i32::MAX; self.vertices.len()];
+        let mut predecessors = vec![None; self.vertices.len()];
+
+        distances[start.id] = 0;
+
+        for vertex in order {
+            for arc in self.adjacency_list[vertex.id].iter() {
+                self.relax(vertex.id, &arc, &mut distances, &mut predecessors);
+            }
+        }
+
+        (distances, predecessors)
     }
 
     fn dijkstra(&self, start: Vertex) -> (Vec<i32>, Vec<Option<usize>>) {
@@ -137,12 +149,13 @@ impl WeightedGraph {
     }
 
     fn relax(
+        &self,
         start: usize,
         arc: &Arc,
         distances: &mut [i32],
         predecessors: &mut [Option<usize>],
     ) -> bool {
-        if distances[start] == 0 {
+        if distances[start] == i32::MAX {
             return false;
         }
 
