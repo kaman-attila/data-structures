@@ -160,17 +160,41 @@ impl WeightedGraph {
         let mut predecessors = vec![None; self.vertices.len()];
         let mut visited = vec![false; self.vertices.len()];
 
-        let mut smallest = self.vertices[0];
-        while distances[smallest.id] != i32::MAX {
-            for vertex in self.vertices.iter() {
-                if distances[vertex.id] < distances[vertex.id] {
-                    smallest = *vertex;
+        distances[start.id] = 0;
+
+        loop {
+            let mut smallest: Option<usize> = None;
+
+            for vertex in &self.vertices {
+                let vertex_index = vertex.id;
+
+                if visited[vertex_index] || distances[vertex_index] == i32::MAX {
+                    continue;
+                }
+
+                let is_better = match smallest {
+                    None => true,
+                    Some(smallest_index) => distances[vertex_index] < distances[smallest_index],
+                };
+
+                if is_better {
+                    smallest = Some(vertex_index);
                 }
             }
 
-            visited[smallest.id] = true;
-            for arc in self.adjacency_list[smallest.id].iter() {
-                self.relax(smallest.id, &arc, &mut distances, &mut predecessors);
+            let Some(_) = smallest else {
+                break;
+            };
+
+            let vertex_index = match smallest {
+                None => break,
+                Some(index) if distances[index] == i32::MAX => break,
+                Some(index) => index,
+            };
+
+            visited[vertex_index] = true;
+            for arc in self.adjacency_list[vertex_index].iter() {
+                self.relax(vertex_index, &arc, &mut distances, &mut predecessors);
             }
         }
 
