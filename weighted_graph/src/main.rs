@@ -71,7 +71,27 @@ impl WeightedGraph {
         Some(post_order)
     }
 
-    fn depth_first_search(&self, start: usize, vertex_colors: &mut [VertexColor], post_order: &mut Vec<usize>) -> bool {}
+    fn depth_first_search(
+        &self,
+        start: usize,
+        vertex_colors: &mut [VertexColor],
+        post_order: &mut Vec<usize>,
+    ) -> bool {
+        vertex_colors[start] = VertexColor::GREY;
+
+        for arc in &self.adjacency_list[start] {
+            let v = arc.end.id;
+            match vertex_colors[v] {
+                VertexColor::WHITE => self.depth_first_search(v, vertex_colors, post_order),
+                VertexColor::GREY => return false,
+                VertexColor::BLACK => continue,
+            };
+        }
+
+        vertex_colors[start] = VertexColor::BLACK;
+        post_order.push(start);
+        true
+    }
 }
 
 fn main() {
