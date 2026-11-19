@@ -22,6 +22,22 @@ impl RingBuffer {
             capacity,
         }
     }
+
+    fn push_front(&mut self, value: u32) {}
+
+    fn push_back(&mut self, value: u32) {}
+
+    fn pop_front(&mut self) -> Option<u32> {}
+
+    fn pop_back(&mut self) -> Option<u32> {}
+
+    fn at(&self, i: usize) -> Option<u32> {}
+
+    fn size(&self) -> u32 {}
+
+    fn is_empty(&self) -> bool {}
+
+    fn debug(&self) {}
 }
 
 fn main() {
