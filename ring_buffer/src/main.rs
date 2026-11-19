@@ -37,7 +37,9 @@ impl RingBuffer {
         self.size
     }
 
-    fn is_empty(&self) -> bool {}
+    fn is_empty(&self) -> bool {
+        self.size == 0
+    }
 
     fn debug(&self) {}
 }
