@@ -1,15 +1,15 @@
 struct RingBuffer {
     data: *mut u32,
     start: usize,
-    size: usize,
-    capacity: usize,
+    size: u32,
+    capacity: u32,
 }
 
 impl RingBuffer {
-    fn new(capacity: usize) -> Self {
+    fn new(capacity: u32) -> Self {
         let capacity = capacity.max(1);
 
-        let layout = std::alloc::Layout::array::<u32>(capacity).unwrap();
+        let layout = std::alloc::Layout::array::<u32>(capacity as usize).unwrap();
         let data = unsafe { std::alloc::alloc(layout) as *mut u32 };
         if data.is_null() {
             std::alloc::handle_alloc_error(layout);
@@ -33,7 +33,9 @@ impl RingBuffer {
 
     fn at(&self, i: usize) -> Option<u32> {}
 
-    fn size(&self) -> u32 {}
+    fn size(&self) -> u32 {
+        self.size
+    }
 
     fn is_empty(&self) -> bool {}
 
