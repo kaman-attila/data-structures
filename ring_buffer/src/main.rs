@@ -27,6 +27,15 @@ impl RingBuffer {
         if self.size == self.capacity {
             self.double_capacity();
         }
+
+        let new_start = (self.start + self.capacity - 1) % self.capacity;
+
+        unsafe {
+            *self.data.add(new_start) = value;
+        }
+
+        self.start = new_start;
+        self.size += 1;
     }
 
     fn push_back(&mut self, value: u32) {
