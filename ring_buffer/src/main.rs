@@ -82,7 +82,15 @@ impl RingBuffer {
 
     fn pop_back(&mut self) -> Option<u32> {}
 
-    fn at(&self, i: usize) -> Option<u32> {}
+    fn at(&self, i: usize) -> Option<u32> {
+        if i >= self.size {
+            return None;
+        }
+
+        let position = (self.start + i) % self.capacity;
+
+        unsafe { Some(*self.data.add(position)) }
+    }
 
     fn size(&self) -> u32 {
         self.size as u32
