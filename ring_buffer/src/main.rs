@@ -42,6 +42,14 @@ impl RingBuffer {
         if self.size == self.capacity {
             self.double_capacity();
         }
+
+        let position = (self.start + self.size) % self.capacity;
+
+        unsafe {
+            *self.data.add(position) = value;
+        }
+
+        self.size += 1;
     }
 
     fn double_capacity(&mut self) {
