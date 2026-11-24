@@ -88,6 +88,10 @@ impl RingBuffer {
         self.start = (self.start + 1) % self.capacity;
         self.size -= 1;
 
+        if self.size() == 0 {
+            self.start = 0;
+        }
+
         Some(value)
     }
 
@@ -129,24 +133,13 @@ impl RingBuffer {
     fn debug(&self) {
         print!("[");
 
-        let mut restart = false;
-        let mut end = self.start + self.size;
-        let mut end_2 = 0;
-        if self.capacity < self.start + self.size {
-            restart = true;
-            end = self.capacity;
-            end_2 = (self.start + self.size) % self.capacity;
-        }
-
         for i in 0..self.capacity {
             if i == self.start {
                 print!("start -> ");
             }
 
-            if (self.start..end).contains(&i) {
-                let value = unsafe { *self.data.add(i) };
-                print!("{}", value);
-            } else if restart && (0..end_2).contains(&i) {
+            let offset = (i + self.capacity - self.start) % self.capacity;
+            if offset < self.size {
                 let value = unsafe { *self.data.add(i) };
                 print!("{}", value);
             } else {
