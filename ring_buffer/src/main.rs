@@ -162,6 +162,15 @@ impl RingBuffer {
     }
 }
 
+impl Drop for RingBuffer {
+    fn drop(&mut self) {
+        let layout = std::alloc::Layout::array::<u32>(self.capacity).unwrap();
+        unsafe {
+            std::alloc::dealloc(self.data as *mut u8, layout);
+        }
+    }
+}
+
 fn main() {
     let mut rb = RingBuffer::new(3);
     rb.debug();
@@ -173,4 +182,15 @@ fn main() {
     rb.debug();
     rb.push_back(8);
     rb.debug();
+    rb.pop_front();
+    rb.debug();
+    rb.pop_back();
+    rb.debug();
+
+    let position = 1;
+    if let Some(value) = rb.at(position) {
+        println!("The value at position {} is {}", position, value);
+    } else {
+        println!("There is no value at position {}", position);
+    }
 }
