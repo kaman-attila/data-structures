@@ -1,3 +1,5 @@
+use std::ptr;
+
 struct RingBuffer {
     data: *mut u32,
     start: usize,
@@ -78,7 +80,18 @@ impl RingBuffer {
         self.start = 0;
     }
 
-    fn pop_front(&mut self) -> Option<u32> {}
+    fn pop_front(&mut self) -> Option<u32> {
+        if self.is_empty() {
+            return None;
+        }
+
+        let value = unsafe { *self.data.add(self.start) };
+
+        self.start = (self.start + 1) % self.capacity;
+        self.size -= 1;
+
+        Some(value)
+    }
 
     fn pop_back(&mut self) -> Option<u32> {}
 
