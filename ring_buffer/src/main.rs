@@ -126,9 +126,51 @@ impl RingBuffer {
         self.size == 0
     }
 
-    fn debug(&self) {}
+    fn debug(&self) {
+        print!("[");
+
+        let mut restart = false;
+        let mut end = self.start + self.size;
+        let mut end_2 = 0;
+        if self.capacity < self.start + self.size {
+            restart = true;
+            end = self.capacity;
+            end_2 = (self.start + self.size) % self.capacity;
+        }
+
+        for i in 0..self.capacity {
+            if i == self.start {
+                print!("start -> ");
+            }
+
+            if (self.start..end).contains(&i) {
+                let value = unsafe { *self.data.add(i) };
+                print!("{}", value);
+            } else if restart && (0..end_2).contains(&i) {
+                let value = unsafe { *self.data.add(i) };
+                print!("{}", value);
+            } else {
+                print!("_");
+            }
+
+            if i != self.capacity - 1 {
+                print!(", ");
+            }
+        }
+
+        print!("]\n");
+    }
 }
 
 fn main() {
-    println!("Hello, world!");
+    let mut rb = RingBuffer::new(3);
+    rb.debug();
+    rb.push_back(2);
+    rb.debug();
+    rb.push_front(5);
+    rb.debug();
+    rb.push_back(1);
+    rb.debug();
+    rb.push_back(8);
+    rb.debug();
 }
