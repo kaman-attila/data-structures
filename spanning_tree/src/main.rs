@@ -1,3 +1,5 @@
+use std::str::Bytes;
+
 #[derive(Clone, Copy, Debug)]
 struct Edge {
     weight: u32,
@@ -98,7 +100,9 @@ fn merge(left: &[Edge], right: &[Edge], descending: bool) -> Vec<Edge> {
     sorted_list
 }
 
-fn name(i: usize) -> char;
+fn name(i: usize) -> char {
+    (b'A' + i as u8) as char
+}
 
 fn main() {
     todo!();
