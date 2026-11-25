@@ -1,5 +1,5 @@
 [workspace]
 resolver = "3"
 members = ["dictionary",
-    "gap_buffer", "graph", "mesh", "ring_buffer", "tailed_linked_list", "weighted_graph",
+    "gap_buffer", "graph", "mesh", "ring_buffer", "spanning_tree", "tailed_linked_list", "weighted_graph",
 ]

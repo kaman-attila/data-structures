@@ -9,8 +9,9 @@ Different data structures and algorithms implemented from scratch in Rust, organ
 * `mesh`: 3D triangle mesh processing and spatial distance queries
 * `graph`: Mesh adjacency list and Breadth-First Search (BFS) traversal
 * `dictionary`: Dictionary with Binary Search Tree and a root pointer using manual memory management
-* `weighted_graph`: Shortest path finder in weighted graphs using Dijkstra, Topological order (with DFS) and Bellman-Ford algorithms.
+* `weighted_graph`: Shortest path finder in weighted graphs using Dijkstra, Topological order (with DFS) and Bellman-Ford algorithms
 * `ring_buffer`: Ring buffer queue data structure
+* `spanning_tree`: Minimum spanning tree finder for weighted undirected graphs using Kruskal (with Union-Find) and Prim algorithms
 
 ## Usage
 
