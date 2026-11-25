@@ -55,7 +55,49 @@ impl Graph {
     fn prim(&self, start: usize) -> SpanningTree;
 }
 
-fn merge_sort(edges: &mut Vec<Edge>, descending: bool);
+fn merge_sort(edges: &mut Vec<Edge>, descending: bool) {
+    if edges.len() < 2 {
+        return;
+    }
+
+    let mid = edges.len() / 2;
+    let mut left = edges[..mid].to_vec();
+    let mut right = edges[mid..].to_vec();
+
+    merge_sort(&mut left, descending);
+    merge_sort(&mut right, descending);
+
+    *edges = merge(&left, &right, descending);
+}
+
+fn merge(left: &[Edge], right: &[Edge], descending: bool) -> Vec<Edge> {
+    let mut sorted_list = Vec::with_capacity(left.len() + right.len());
+
+    let mut i = 0;
+    let mut j = 0;
+
+    while i < left.len() && j < right.len() {
+        let take_left = if descending {
+            left[i].weight >= right[j].weight
+        } else {
+            left[i].weight <= right[j].weight
+        };
+
+        if take_left {
+            sorted_list.push(left[i]);
+            i += 1;
+        } else {
+            sorted_list.push(right[j]);
+            j += 1;
+        }
+    }
+
+    sorted_list.extend_from_slice(&left[i..]);
+    sorted_list.extend_from_slice(&right[j..]);
+
+    sorted_list
+}
+
 fn name(i: usize) -> char;
 
 fn main() {
