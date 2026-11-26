@@ -1,3 +1,5 @@
+use std::fmt::write;
+
 #[derive(Clone, Copy, Debug)]
 struct Edge {
     weight: u32,
@@ -12,7 +14,9 @@ impl Edge {
 }
 
 impl std::fmt::Display for Edge {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result;
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}-{} {}", name(self.u), name(self.v), self.weight)
+    }
 }
 
 struct UnionFind {
