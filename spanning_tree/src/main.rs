@@ -26,7 +26,7 @@ struct UnionFind {
 impl UnionFind {
     fn new(n: usize) -> Self {
         UnionFind {
-            parent: (0..=n).collect(),
+            parent: (0..n).collect(),
             rank: vec![0; n],
             components: n,
         }
@@ -56,6 +56,8 @@ impl UnionFind {
             self.parent[root_b] = root_a;
             self.rank[root_a] += 1;
         }
+
+        self.components -= 1;
 
         true
     }
@@ -129,7 +131,7 @@ impl Graph {
             return SpanningTree {
                 edges: vec![],
                 total: 0,
-                components: 0,
+                components: 1,
             };
         }
         let mut edges = self.edges.clone();
@@ -138,7 +140,7 @@ impl Graph {
         let mut spanning_tree = SpanningTree {
             edges: Vec::with_capacity(self.n - 1),
             total: 0,
-            components: 0,
+            components: 1,
         };
         let mut union_find = UnionFind::new(self.n);
 
@@ -160,7 +162,16 @@ impl Graph {
     }
 
     fn prim(&self, start: usize) -> SpanningTree {
-        if self.n == 0 || start >= self.n {
+        if self.n == 0 {
+            return SpanningTree {
+                edges: vec![],
+                total: 0,
+                components: 1,
+            };
+        }
+
+        if start >= self.n {
+            println!("The start vertex you have chosen exceeds the number of vertices.");
             return SpanningTree {
                 edges: vec![],
                 total: 0,
@@ -171,7 +182,7 @@ impl Graph {
         let mut spanning_tree = SpanningTree {
             edges: Vec::with_capacity(self.n - 1),
             total: 0,
-            components: 0,
+            components: 1,
         };
 
         let adjacency_matrix = self.adjacency_matrix();
@@ -202,7 +213,14 @@ impl Graph {
 
             let index = match smallest {
                 Some(i) => i,
-                None => break,
+                None => match (0..self.n).find(|&v| !in_tree[v]) {
+                    None => break,
+                    Some(unreached) => {
+                        spanning_tree.components += 1;
+                        distances[unreached] = 0;
+                        unreached
+                    }
+                },
             };
 
             in_tree[index] = true;
@@ -292,18 +310,12 @@ fn main() {
     graph.add_edge(2, 4, 5);
 
     println!("Kruskal: ");
-    let minimum_spanning_tree_with_kruskal = graph.kruskal();
-    println!("{}", minimum_spanning_tree_with_kruskal);
-    println!(
-        "Connected: {}",
-        minimum_spanning_tree_with_kruskal.is_connected()
-    );
+    let kruskal_tree = graph.kruskal();
+    println!("{}", kruskal_tree);
+    println!("Connected: {}", kruskal_tree.is_connected());
 
     println!("\nPrim from A: ");
-    let minimum_spanning_tree_with_prim = graph.prim(0);
-    println!("{}", minimum_spanning_tree_with_prim);
-    println!(
-        "Connected: {}",
-        minimum_spanning_tree_with_prim.is_connected()
-    );
+    let prim_tree = graph.prim(0);
+    println!("{}", prim_tree);
+    println!("Connected: {}", prim_tree.is_connected());
 }
