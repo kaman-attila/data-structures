@@ -37,8 +37,27 @@ impl UnionFind {
         }
         self.parent[x]
     }
-    
-    fn union(&mut self, a: usize, b: usize) -> bool;
+
+    fn union(&mut self, a: usize, b: usize) -> bool {
+        let root_a = self.find(a);
+        let root_b = self.find(b);
+
+        if root_a == root_b {
+            return false;
+        }
+
+        if self.rank[root_a] > self.rank[root_b] {
+            self.parent[root_b] = root_a;
+        } else if self.rank[root_a] < self.rank[root_b] {
+            self.parent[root_a] = root_b;
+        } else {
+            self.parent[root_b] = root_a;
+            self.rank[root_a] += 1;
+        }
+
+        true
+    }
+
     fn components(&self) -> usize;
     fn debug(&self);
 }
