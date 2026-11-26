@@ -22,7 +22,14 @@ struct UnionFind {
 }
 
 impl UnionFind {
-    fn new(n: usize) -> Self;
+    fn new(n: usize) -> Self {
+        UnionFind {
+            parent: (0..=n).collect(),
+            rank: vec![0; n],
+            components: n,
+        }
+    }
+
     fn find(&mut self, x: usize) -> usize;
     fn union(&mut self, a: usize, b: usize) -> bool;
     fn components(&self) -> usize;
