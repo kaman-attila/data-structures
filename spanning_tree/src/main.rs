@@ -90,7 +90,42 @@ impl Graph {
     fn new(n: usize) -> Self;
     fn add_edge(&mut self, weight: u32, u: usize, v: usize);
     fn adjacency_matrix(&self) -> Vec<Vec<Option<u32>>>;
-    fn kruskal(&self) -> SpanningTree;
+
+    fn kruskal(&self) -> SpanningTree {
+        if self.n == 0 {
+            return SpanningTree {
+                edges: vec![],
+                total: 0,
+                components: 0,
+            };
+        }
+        let mut edges = self.edges.clone();
+        merge_sort(&mut edges, false);
+
+        let mut spanning_tree = SpanningTree {
+            edges: Vec::with_capacity(self.n - 1),
+            total: 0,
+            components: 0,
+        };
+        let mut union_find = UnionFind::new(self.n);
+
+        for &edge in &edges {
+            if spanning_tree.edges.len() + 1 == self.n {
+                break;
+            }
+
+            if union_find.union(edge.u, edge.v) {
+                spanning_tree.edges.push(edge);
+                spanning_tree.total += edge.weight;
+            }
+
+            union_find.debug();
+        }
+
+        spanning_tree.components = union_find.components();
+        spanning_tree
+    }
+
     fn maximum_spanning_tree(&self) -> SpanningTree;
     fn prim(&self, start: usize) -> SpanningTree;
 }
