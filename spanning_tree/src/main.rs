@@ -147,7 +147,7 @@ impl Graph {
     fn maximum_spanning_tree(&self) -> SpanningTree;
 
     fn prim(&self, start: usize) -> SpanningTree {
-        if self.n == 0 {
+        if self.n == 0 || start >= self.n {
             return SpanningTree {
                 edges: vec![],
                 total: 0,
@@ -161,6 +161,58 @@ impl Graph {
             components: 0,
         };
 
+        let adjacency_matrix = self.adjacency_matrix();
+
+        let mut in_tree = vec![false; self.n];
+        let mut distances = vec![u32::MAX; self.n];
+        let mut parents: Vec<Option<usize>> = vec![None; self.n];
+
+        distances[start] = 0;
+
+        loop {
+            let mut smallest: Option<usize> = None;
+
+            for vertex in 0..self.n {
+                if in_tree[vertex] || distances[vertex] == u32::MAX {
+                    continue;
+                }
+
+                let is_better = match smallest {
+                    None => true,
+                    Some(smallest_index) => distances[vertex] < distances[smallest_index],
+                };
+
+                if is_better {
+                    smallest = Some(vertex);
+                }
+            }
+
+            let index = match smallest {
+                Some(i) => i,
+                None => break,
+            };
+
+            in_tree[index] = true;
+            if let Some(p) = parents[index] {
+                spanning_tree
+                    .edges
+                    .push(Edge::new(distances[index], p, index));
+                spanning_tree.total += distances[index];
+            }
+
+            for v in 0..self.n {
+                if in_tree[v] {
+                    continue;
+                }
+
+                if let Some(weight) = adjacency_matrix[index][v] {
+                    if weight < distances[v] {
+                        distances[v] = weight;
+                        parents[v] = Some(index);
+                    }
+                }
+            }
+        }
 
         spanning_tree
     }
