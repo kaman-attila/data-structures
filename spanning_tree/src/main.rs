@@ -58,7 +58,10 @@ impl UnionFind {
         true
     }
 
-    fn components(&self) -> usize;
+    fn components(&self) -> usize {
+        self.components
+    }
+
     fn debug(&self);
 }
 
