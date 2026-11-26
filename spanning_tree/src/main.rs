@@ -62,7 +62,9 @@ impl UnionFind {
         self.components
     }
 
-    fn debug(&self);
+    fn debug(&self) {
+        println!("{:?}", self.parent);
+    }
 }
 
 struct SpanningTree {
