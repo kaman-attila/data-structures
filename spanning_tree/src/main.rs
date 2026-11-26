@@ -1,5 +1,3 @@
-use std::fmt::write;
-
 #[derive(Clone, Copy, Debug)]
 struct Edge {
     weight: u32,
@@ -84,7 +82,18 @@ impl SpanningTree {
 }
 
 impl std::fmt::Display for SpanningTree {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result;
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Edges:");
+
+        for i in 0..self.edges.len() {
+            write!(f, " {}", &self.edges[i]);
+
+            if i != self.edges.len() - 1 {
+                write!(f, ",");
+            }
+        }
+        writeln!(f, "Total: {}", self.total)
+    }
 }
 
 struct Graph {
