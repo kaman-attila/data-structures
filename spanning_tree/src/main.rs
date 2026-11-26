@@ -83,16 +83,16 @@ impl SpanningTree {
 
 impl std::fmt::Display for SpanningTree {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Edges:");
+        write!(f, "Edges:")?;
 
         for i in 0..self.edges.len() {
-            write!(f, " {}", &self.edges[i]);
+            write!(f, " {}", &self.edges[i])?;
 
             if i != self.edges.len() - 1 {
-                write!(f, ",");
+                write!(f, ",")?;
             }
         }
-        writeln!(f, "Total: {}", self.total)
+        write!(f, "\nTotal: {}", self.total)
     }
 }
 
@@ -158,8 +158,6 @@ impl Graph {
         spanning_tree.components = union_find.components();
         spanning_tree
     }
-
-    fn maximum_spanning_tree(&self) -> SpanningTree;
 
     fn prim(&self, start: usize) -> SpanningTree {
         if self.n == 0 || start >= self.n {
@@ -281,5 +279,31 @@ fn name(i: usize) -> char {
 }
 
 fn main() {
-    todo!();
+    let mut graph = Graph::new(6);
+    graph.add_edge(4, 0, 1);
+    graph.add_edge(2, 0, 2);
+    graph.add_edge(5, 1, 2);
+    graph.add_edge(7, 1, 3);
+    graph.add_edge(9, 2, 4);
+    graph.add_edge(3, 3, 4);
+    graph.add_edge(1, 1, 5);
+    graph.add_edge(6, 2, 5);
+    graph.add_edge(8, 3, 5);
+    graph.add_edge(2, 4, 5);
+
+    println!("Kruskal: ");
+    let minimum_spanning_tree_with_kruskal = graph.kruskal();
+    println!("{}", minimum_spanning_tree_with_kruskal);
+    println!(
+        "Connected: {}",
+        minimum_spanning_tree_with_kruskal.is_connected()
+    );
+
+    println!("\nPrim from A: ");
+    let minimum_spanning_tree_with_prim = graph.prim(0);
+    println!("{}", minimum_spanning_tree_with_prim);
+    println!(
+        "Connected: {}",
+        minimum_spanning_tree_with_prim.is_connected()
+    );
 }
