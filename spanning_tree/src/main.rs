@@ -74,7 +74,9 @@ struct SpanningTree {
 }
 
 impl SpanningTree {
-    fn is_connected(&self) -> bool;
+    fn is_connected(&self) -> bool {
+        self.components == 1
+    }
 }
 
 impl std::fmt::Display for SpanningTree {
