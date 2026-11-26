@@ -30,7 +30,14 @@ impl UnionFind {
         }
     }
 
-    fn find(&mut self, x: usize) -> usize;
+    fn find(&mut self, x: usize) -> usize {
+        if self.parent[x] != x {
+            let root = self.find(self.parent[x]);
+            self.parent[x] = root;
+        }
+        self.parent[x]
+    }
+    
     fn union(&mut self, a: usize, b: usize) -> bool;
     fn components(&self) -> usize;
     fn debug(&self);
