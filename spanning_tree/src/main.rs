@@ -98,7 +98,16 @@ impl Graph {
         self.edges.push(Edge::new(weight, u, v));
     }
 
-    fn adjacency_matrix(&self) -> Vec<Vec<Option<u32>>>;
+    fn adjacency_matrix(&self) -> Vec<Vec<Option<u32>>> {
+        let mut matrix = vec![vec![None; self.n]; self.n];
+
+        for edge in &self.edges {
+            matrix[edge.u][edge.v] = Some(edge.weight);
+            matrix[edge.v][edge.u] = Some(edge.weight);
+        }
+
+        matrix
+    }
 
     fn kruskal(&self) -> SpanningTree {
         if self.n == 0 {
@@ -137,7 +146,24 @@ impl Graph {
 
     fn maximum_spanning_tree(&self) -> SpanningTree;
 
-    fn prim(&self, start: usize) -> SpanningTree {}
+    fn prim(&self, start: usize) -> SpanningTree {
+        if self.n == 0 {
+            return SpanningTree {
+                edges: vec![],
+                total: 0,
+                components: 0,
+            };
+        }
+
+        let mut spanning_tree = SpanningTree {
+            edges: Vec::with_capacity(self.n - 1),
+            total: 0,
+            components: 0,
+        };
+
+
+        spanning_tree
+    }
 }
 
 fn merge_sort(edges: &mut Vec<Edge>, descending: bool) {
