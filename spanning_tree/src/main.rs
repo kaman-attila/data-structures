@@ -1,5 +1,3 @@
-use std::str::Bytes;
-
 #[derive(Clone, Copy, Debug)]
 struct Edge {
     weight: u32,
@@ -8,7 +6,9 @@ struct Edge {
 }
 
 impl Edge {
-    fn new(weight: u32, u: usize, v: usize) -> Self;
+    fn new(weight: u32, u: usize, v: usize) -> Self {
+        Edge { weight, u, v }
+    }
 }
 
 impl std::fmt::Display for Edge {
@@ -87,8 +87,17 @@ struct Graph {
 }
 
 impl Graph {
-    fn new(n: usize) -> Self;
-    fn add_edge(&mut self, weight: u32, u: usize, v: usize);
+    fn new(n: usize) -> Self {
+        Graph {
+            n,
+            edges: Vec::new(),
+        }
+    }
+
+    fn add_edge(&mut self, weight: u32, u: usize, v: usize) {
+        self.edges.push(Edge::new(weight, u, v));
+    }
+
     fn adjacency_matrix(&self) -> Vec<Vec<Option<u32>>>;
 
     fn kruskal(&self) -> SpanningTree {
@@ -127,7 +136,8 @@ impl Graph {
     }
 
     fn maximum_spanning_tree(&self) -> SpanningTree;
-    fn prim(&self, start: usize) -> SpanningTree;
+
+    fn prim(&self, start: usize) -> SpanningTree {}
 }
 
 fn merge_sort(edges: &mut Vec<Edge>, descending: bool) {
